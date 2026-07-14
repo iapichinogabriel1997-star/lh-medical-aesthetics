@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="2000"
+   height="1999.9999"
+   viewBox="0 0 2000 1999.9999"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <pattern
+       xlink:href="#pattern25"
+       preserveAspectRatio="xMidYMid"
+       id="pattern29"
+       patternTransform="translate(1176.0772,578.09296)" />
+    <rect
+       x="497.29105"
+       y="1335.6991"
+       width="563.04855"
+       height="96.581321"
+       id="rect29" />
+    <pattern
+       patternUnits="userSpaceOnUse"
+       width="100"
+       height="796.55176"
+       patternTransform="translate(991.00781,503.18393)"
+       preserveAspectRatio="xMidYMid"
+       id="pattern25">
+      <rect
+         style="fill-opacity:1;stroke-width:0.319252"
+         id="rect19"
+         width="100"
+         height="796.55176"
+         x="0"
+         y="0" />
+    </pattern>
+  </defs>
+  <g
+     id="g1">
+    <g
+       id="g2"
+       transform="translate(185.06937,74.909029)">
+      <text
+         xml:space="preserve"
+         id="text29"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:44.051px;line-height:1.1;font-family:'Hiragino Sans';-inkscape-font-specification:'Hiragino Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;white-space:pre;shape-inside:url(#rect29);fill:#000000;fill-opacity:1;stroke-width:0.377953"
+         transform="matrix(1.0805746,0,0,1.0805746,-56.623493,-116.35427)"><tspan
+           x="520.91878"
+           y="1376.6666"
+           id="tspan1">MEDICAL AESTHETICS</tspan></text>
+    </g>
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke-width:0.336601"
+       id="rect16"
+       width="100"
+       height="703.06848"
+       x="658.06934"
+       y="574.90906" />
+    <path
+       id="rect17"
+       style="fill:#000000;fill-opacity:1;stroke-width:0.30861"
+       d="m 658.06937,1274.6434 v 100 h 520.00003 v -60.6524 l -39.3477,-39.3476 z" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke-width:0.347079"
+       id="rect18"
+       width="436.08838"
+       height="100"
+       x="828.26849"
+       y="858.71265" />
+    <path
+       id="rect25"
+       clip-path="none"
+       style="fill:url(#pattern29);stroke:none"
+       d="m 1176.0772,578.09262 v 666.04298 l 100,100 V 578.09262 Z m 0,733.90618 v 62.6465 h 62.6465 z" />
+  </g>
+</svg>
