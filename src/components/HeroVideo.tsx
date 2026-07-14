@@ -1,29 +1,38 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import Image from "next/image";
 
 export default function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleCanPlay = () => {
-      video.play().then(() => setVideoLoaded(true)).catch(() => {});
+    // Force play on iOS/mobile
+    const tryPlay = () => {
+      video.play().catch(() => {});
     };
 
-    video.addEventListener("canplaythrough", handleCanPlay);
-    video.load();
+    video.addEventListener("loadeddata", tryPlay);
+    tryPlay();
 
-    return () => video.removeEventListener("canplaythrough", handleCanPlay);
+    // Also try on user interaction (iOS requirement)
+    const handleTouch = () => {
+      tryPlay();
+      document.removeEventListener("touchstart", handleTouch);
+    };
+    document.addEventListener("touchstart", handleTouch);
+
+    return () => {
+      video.removeEventListener("loadeddata", tryPlay);
+      document.removeEventListener("touchstart", handleTouch);
+    };
   }, []);
 
   return (
     <>
-      {/* Image fallback toujours visible derrière */}
       <Image
         src="/images/8.webp"
         alt=""
@@ -31,9 +40,9 @@ export default function HeroVideo() {
         priority
         style={{ objectFit: "cover", opacity: 0.5 }}
       />
-      {/* Vidéo par-dessus quand elle est prête */}
       <video
         ref={videoRef}
+        autoPlay
         muted
         loop
         playsInline
@@ -44,10 +53,11 @@ export default function HeroVideo() {
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          opacity: videoLoaded ? 0.5 : 0,
+          opacity: 0.5,
           zIndex: 1,
-          transition: "opacity 1s ease",
         }}
+        // iOS needs these as attributes
+        {...{ "webkit-playsinline": "true" } as Record<string, string>}
       >
         <source src="/images/video-hero.mp4" type="video/mp4" />
       </video>
