@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
+import { sendBookingEmailToOwner, sendBookingConfirmationToClient } from "@/lib/email";
 
 function timeToMinutes(t: string): number {
   const [h, m] = t.split(":").map(Number);
@@ -100,6 +101,31 @@ export async function POST(req: NextRequest) {
       args: [sv.name, sv.price, sv.duration, date, currentTime, svEnd, firstName, lastName, email, phone, note || ""],
     });
     currentTime = svEnd;
+  }
+
+  // Envoi des emails
+  const totalPrice = services.reduce((s: number, sv: { price: number }) => s + sv.price, 0);
+  const bookingDetails = {
+    firstName,
+    lastName,
+    email,
+    phone,
+    date,
+    time,
+    endTime,
+    services,
+    total: totalPrice,
+    note,
+  };
+
+  try {
+    await Promise.all([
+      sendBookingEmailToOwner(bookingDetails),
+      sendBookingConfirmationToClient(bookingDetails),
+    ]);
+  } catch (emailError) {
+    console.error("Erreur envoi email:", emailError);
+    // On ne bloque pas la réservation si l'email échoue
   }
 
   return NextResponse.json({ success: true, message: "Réservation confirmée" });
