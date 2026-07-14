@@ -68,7 +68,8 @@
       "Bash(ffmpeg -i /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-lh.mp4 -ss 8 -t 12 -vcodec libx264 -crf 32 -preset fast -vf scale=960:-2 -an -movflags +faststart /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-hero.mp4 -y)",
       "Bash(curl *)",
       "Bash(ffprobe /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-hero.mp4)",
-      "Bash(ffmpeg -ss 8 -t 12 -i '/Users/luigiiapichino/Library/CloudStorage/Dropbox/MEDIA DIVINA-PRO/Marketing/Clients/LH aesthetics/Website/Video-LH.mp4' -vcodec libx264 -profile:v high -pix_fmt yuv420p -crf 28 -preset fast -vf scale=960:-2 -an -movflags +faststart /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-hero.mp4 -y)"
+      "Bash(ffmpeg -ss 8 -t 12 -i '/Users/luigiiapichino/Library/CloudStorage/Dropbox/MEDIA DIVINA-PRO/Marketing/Clients/LH aesthetics/Website/Video-LH.mp4' -vcodec libx264 -profile:v high -pix_fmt yuv420p -crf 28 -preset fast -vf scale=960:-2 -an -movflags +faststart /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-hero.mp4 -y)",
+      "Bash(node *)"
     ]
   }
 }
