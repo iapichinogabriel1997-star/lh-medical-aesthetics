@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
 import { createToken } from "@/lib/auth";
 
@@ -10,7 +10,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Champs requis" }, { status: 400 });
     }
 
-    const db = await getDb();
+    const db = createClient({
+      url: process.env.TURSO_DATABASE_URL || "",
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    });
+
     const result = await db.execute({ sql: "SELECT * FROM admin WHERE username = ?", args: [username] });
     const admin = result.rows[0];
 
@@ -35,6 +39,6 @@ export async function POST(req: NextRequest) {
     return res;
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json({ error: "Erreur serveur: " + (error as Error).message }, { status: 500 });
   }
 }
