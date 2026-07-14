@@ -17,45 +17,43 @@ export async function getDb() {
 }
 
 async function initDb() {
-  await db.executeMultiple(`
-    CREATE TABLE IF NOT EXISTS admin (
-      id INTEGER PRIMARY KEY,
-      username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL
-    );
+  await db.execute(`CREATE TABLE IF NOT EXISTS admin (
+    id INTEGER PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL
+  )`);
 
-    CREATE TABLE IF NOT EXISTS bookings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      service_name TEXT NOT NULL,
-      service_price INTEGER NOT NULL,
-      service_duration INTEGER NOT NULL,
-      date TEXT NOT NULL,
-      time TEXT NOT NULL,
-      end_time TEXT NOT NULL,
-      first_name TEXT NOT NULL,
-      last_name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      note TEXT DEFAULT '',
-      status TEXT DEFAULT 'confirmed',
-      created_at TEXT DEFAULT (datetime('now'))
-    );
+  await db.execute(`CREATE TABLE IF NOT EXISTS bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    service_name TEXT NOT NULL,
+    service_price INTEGER NOT NULL,
+    service_duration INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    note TEXT DEFAULT '',
+    status TEXT DEFAULT 'confirmed',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
 
-    CREATE TABLE IF NOT EXISTS availability (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      day_of_week INTEGER NOT NULL,
-      start_time TEXT NOT NULL,
-      end_time TEXT NOT NULL
-    );
+  await db.execute(`CREATE TABLE IF NOT EXISTS availability (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day_of_week INTEGER NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL
+  )`);
 
-    CREATE TABLE IF NOT EXISTS blocked_slots (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL,
-      start_time TEXT NOT NULL,
-      end_time TEXT NOT NULL,
-      reason TEXT DEFAULT ''
-    );
-  `);
+  await db.execute(`CREATE TABLE IF NOT EXISTS blocked_slots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    reason TEXT DEFAULT ''
+  )`);
 
   // Seed admin
   const adminCheck = await db.execute("SELECT COUNT(*) as count FROM admin");
