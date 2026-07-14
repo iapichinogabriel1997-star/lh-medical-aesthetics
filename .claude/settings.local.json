@@ -59,7 +59,12 @@
       "Bash(git add *)",
       "Bash(git init *)",
       "Bash(git branch *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(gh repo *)",
+      "Bash(sudo npm *)",
+      "Bash(npx vercel *)",
+      "Bash(npx firebase-tools *)",
+      "Bash(git push *)"
     ]
   }
 }
