@@ -1,21 +1,29 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    video.currentTime = 8;
-    video.play().catch(() => {});
+
+    const handleCanPlay = () => {
+      video.play().then(() => setVideoLoaded(true)).catch(() => {});
+    };
+
+    video.addEventListener("canplaythrough", handleCanPlay);
+    video.load();
+
+    return () => video.removeEventListener("canplaythrough", handleCanPlay);
   }, []);
 
   return (
     <>
-      {/* Image fallback visible pendant le chargement de la vidéo */}
+      {/* Image fallback toujours visible derrière */}
       <Image
         src="/images/8.webp"
         alt=""
@@ -23,25 +31,25 @@ export default function HeroVideo() {
         priority
         style={{ objectFit: "cover", opacity: 0.5 }}
       />
+      {/* Vidéo par-dessus quand elle est prête */}
       <video
         ref={videoRef}
-        autoPlay
         muted
         loop
         playsInline
         preload="auto"
-        poster="/images/8.webp"
         style={{
           position: "absolute",
           inset: 0,
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          opacity: 0.5,
+          opacity: videoLoaded ? 0.5 : 0,
           zIndex: 1,
+          transition: "opacity 1s ease",
         }}
       >
-        <source src="/images/video-lh.mp4" type="video/mp4" />
+        <source src="/images/video-hero.mp4" type="video/mp4" />
       </video>
     </>
   );

@@ -64,7 +64,8 @@
       "Bash(sudo npm *)",
       "Bash(npx vercel *)",
       "Bash(npx firebase-tools *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(ffmpeg -i /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-lh.mp4 -ss 8 -t 12 -vcodec libx264 -crf 32 -preset fast -vf scale=960:-2 -an -movflags +faststart /Users/luigiiapichino/LH-Medical-Aesthetics/public/images/video-hero.mp4 -y)"
     ]
   }
 }
