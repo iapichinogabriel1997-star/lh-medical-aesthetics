@@ -10,24 +10,22 @@ export default function HeroVideo() {
     const video = videoRef.current;
     if (!video) return;
 
-    // Force play on iOS/mobile
-    const tryPlay = () => {
+    video.src = "/images/video-hero.mp4";
+    video.load();
+
+    const play = () => {
       video.play().catch(() => {});
     };
 
-    video.addEventListener("loadeddata", tryPlay);
-    tryPlay();
+    video.addEventListener("canplay", play);
+    play();
 
-    // Also try on user interaction (iOS requirement)
-    const handleTouch = () => {
-      tryPlay();
-      document.removeEventListener("touchstart", handleTouch);
-    };
-    document.addEventListener("touchstart", handleTouch);
+    window.addEventListener("touchstart", play, { once: true });
+    window.addEventListener("click", play, { once: true });
+    window.addEventListener("scroll", play, { once: true });
 
     return () => {
-      video.removeEventListener("loadeddata", tryPlay);
-      document.removeEventListener("touchstart", handleTouch);
+      video.removeEventListener("canplay", play);
     };
   }, []);
 
@@ -40,6 +38,7 @@ export default function HeroVideo() {
         priority
         style={{ objectFit: "cover", opacity: 0.5 }}
       />
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <video
         ref={videoRef}
         autoPlay
@@ -47,6 +46,8 @@ export default function HeroVideo() {
         loop
         playsInline
         preload="auto"
+        webkit-playsinline=""
+        x5-playsinline=""
         style={{
           position: "absolute",
           inset: 0,
@@ -56,11 +57,7 @@ export default function HeroVideo() {
           opacity: 0.5,
           zIndex: 1,
         }}
-        // iOS needs these as attributes
-        {...{ "webkit-playsinline": "true" } as Record<string, string>}
-      >
-        <source src="/images/video-hero.mp4" type="video/mp4" />
-      </video>
+      />
     </>
   );
 }
