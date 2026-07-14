@@ -20,8 +20,8 @@ export default function Footer() {
             <Image
               src="/images/logo.svg"
               alt="LH Medical Aesthetics"
-              width={32}
-              height={32}
+              width={45}
+              height={45}
               style={{ filter: "invert(1)" }}
             />
             <span style={{ fontSize: "0.7rem", fontWeight: 300, letterSpacing: "0.2em", textTransform: "uppercase" }}>

@@ -54,8 +54,8 @@ export default function Header() {
           <Image
             src="/images/logo.svg"
             alt="LH Medical Aesthetics"
-            width={36}
-            height={36}
+            width={50}
+            height={50}
             style={{ filter: scrolled ? "none" : "invert(1)" , transition: "filter 0.4s ease" }}
           />
           <span

@@ -41,8 +41,8 @@ export default function Home() {
             <Image
               src="/images/logo.svg"
               alt="LH Medical Aesthetics"
-              width={70}
-              height={70}
+              width={110}
+              height={110}
               style={{ margin: "0 auto 2rem", filter: "invert(1)" }}
             />
           </AnimateOnScroll>
