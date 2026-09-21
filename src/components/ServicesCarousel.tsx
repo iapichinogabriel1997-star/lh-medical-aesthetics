@@ -102,12 +102,6 @@ export default function ServicesCarousel() {
   const rafRef = useRef<number>(0);
   const posRef = useRef(0);
   const pausedRef = useRef(false);
-  const draggingRef = useRef(false);
-  const dragStartXRef = useRef(0);
-  const dragStartYRef = useRef(0);
-  const dragStartPosRef = useRef(0);
-  const dragDistRef = useRef(0);
-  const lockedAxisRef = useRef<"x" | "y" | null>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const CARD_W = 280;
@@ -128,92 +122,25 @@ export default function ServicesCarousel() {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = setTimeout(() => {
       pausedRef.current = false;
-    }, 3000);
+    }, 4000);
   }, []);
 
-  /* ── pointer events (mouse + touch unified) ── */
-  const onDown = useCallback((clientX: number, clientY: number) => {
-    draggingRef.current = true;
+  /* Arrow navigation — jump one card */
+  const goNext = useCallback(() => {
     pausedRef.current = true;
-    dragStartXRef.current = clientX;
-    dragStartYRef.current = clientY;
-    dragStartPosRef.current = posRef.current;
-    dragDistRef.current = 0;
-    lockedAxisRef.current = null;
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-  }, []);
-
-  const onMove = useCallback(
-    (clientX: number, clientY: number, e: Event) => {
-      if (!draggingRef.current) return;
-
-      const dx = dragStartXRef.current - clientX;
-      const dy = dragStartYRef.current - clientY;
-
-      /* Lock axis after 8px of movement to decide scroll vs swipe */
-      if (!lockedAxisRef.current) {
-        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-          lockedAxisRef.current = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
-        }
-        return;
-      }
-
-      /* If vertical scroll, release control */
-      if (lockedAxisRef.current === "y") {
-        draggingRef.current = false;
-        scheduleResume();
-        return;
-      }
-
-      /* Horizontal swipe — prevent page scroll and move carousel */
-      e.preventDefault();
-      dragDistRef.current = dx;
-      posRef.current = wrap(dragStartPosRef.current + dx);
-      applyPos();
-    },
-    [wrap, applyPos, scheduleResume],
-  );
-
-  const onUp = useCallback(() => {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    lockedAxisRef.current = null;
+    posRef.current = wrap(posRef.current + CARD_W + GAP);
+    applyPos();
     scheduleResume();
-  }, [scheduleResume]);
+  }, [wrap, applyPos, scheduleResume, CARD_W, GAP]);
 
-  /* Attach touch listeners with { passive: false } so we can preventDefault */
-  useEffect(() => {
-    const el = trackRef.current?.parentElement;
-    if (!el) return;
+  const goPrev = useCallback(() => {
+    pausedRef.current = true;
+    posRef.current = wrap(posRef.current - CARD_W - GAP);
+    applyPos();
+    scheduleResume();
+  }, [wrap, applyPos, scheduleResume, CARD_W, GAP]);
 
-    const handleTouchStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      onDown(t.clientX, t.clientY);
-    };
-    const handleTouchMove = (e: TouchEvent) => {
-      const t = e.touches[0];
-      onMove(t.clientX, t.clientY, e);
-    };
-    const handleTouchEnd = () => onUp();
-
-    el.addEventListener("touchstart", handleTouchStart, { passive: true });
-    el.addEventListener("touchmove", handleTouchMove, { passive: false });
-    el.addEventListener("touchend", handleTouchEnd, { passive: true });
-
-    return () => {
-      el.removeEventListener("touchstart", handleTouchStart);
-      el.removeEventListener("touchmove", handleTouchMove);
-      el.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [onDown, onMove, onUp]);
-
-  /* ── mouse drag ── */
-  const onMouseDown = (e: React.MouseEvent) => onDown(e.clientX, e.clientY);
-  const onMouseMove = (e: React.MouseEvent) =>
-    onMove(e.clientX, e.clientY, e.nativeEvent);
-  const onMouseUp = () => onUp();
-
-  /* ── autoplay ── */
+  /* Autoplay */
   useEffect(() => {
     const animate = () => {
       if (!pausedRef.current) {
@@ -234,6 +161,7 @@ export default function ServicesCarousel() {
       className="section-padding"
       style={{ background: "#f8f8f8", overflow: "hidden" }}
     >
+      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "3rem" }}>
         <p
           style={{
@@ -259,29 +187,77 @@ export default function ServicesCarousel() {
         </h2>
       </div>
 
-      <div
-        style={{
-          overflow: "hidden",
-          cursor: "grab",
-          userSelect: "none",
-        }}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        <div
-          ref={trackRef}
+      {/* Carousel area */}
+      <div style={{ position: "relative" }}>
+        {/* Track */}
+        <div style={{ overflow: "hidden" }}>
+          <div
+            ref={trackRef}
+            style={{
+              display: "flex",
+              gap: `${GAP}px`,
+              willChange: "transform",
+            }}
+          >
+            {items.map((s, i) => (
+              <Card key={`${s.title}-${i}`} s={s} />
+            ))}
+          </div>
+        </div>
+
+        {/* Arrow left */}
+        <button
+          onClick={goPrev}
+          aria-label="Précédent"
           style={{
+            position: "absolute",
+            top: "50%",
+            left: "0.75rem",
+            transform: "translateY(-50%)",
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.9)",
+            border: "none",
+            cursor: "pointer",
             display: "flex",
-            gap: `${GAP}px`,
-            willChange: "transform",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            zIndex: 10,
           }}
         >
-          {items.map((s, i) => (
-            <Card key={`${s.title}-${i}`} s={s} />
-          ))}
-        </div>
+          <svg width="18" height="18" fill="none" stroke="#000" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        {/* Arrow right */}
+        <button
+          onClick={goNext}
+          aria-label="Suivant"
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: "0.75rem",
+            transform: "translateY(-50%)",
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.9)",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            zIndex: 10,
+          }}
+        >
+          <svg width="18" height="18" fill="none" stroke="#000" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
     </section>
   );
