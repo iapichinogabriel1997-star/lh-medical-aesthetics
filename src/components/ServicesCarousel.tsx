@@ -158,11 +158,10 @@ export default function ServicesCarousel() {
 
   return (
     <section
-      className="section-padding"
-      style={{ background: "#f8f8f8", overflow: "hidden" }}
+      style={{ background: "#f8f8f8", overflow: "hidden", paddingTop: "5rem", paddingBottom: "5rem" }}
     >
       {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+      <div style={{ textAlign: "center", marginBottom: "3rem", padding: "0 2rem" }}>
         <p
           style={{
             fontSize: "0.7rem",
