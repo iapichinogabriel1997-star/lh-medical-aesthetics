@@ -31,19 +31,27 @@ const services = [
   },
 ];
 
-const items = [...services, ...services];
-
-function Card({ s }: { s: (typeof services)[number] }) {
+function Card({
+  s,
+  active,
+}: {
+  s: (typeof services)[number];
+  active: boolean;
+}) {
   const [hovered, setHovered] = useState(false);
+  const lit = active || hovered;
 
   return (
     <Link
       href={s.href}
       style={{
-        flex: "0 0 280px",
+        flex: "0 0 var(--card-w)",
         textDecoration: "none",
         color: "inherit",
         display: "block",
+        transition: "transform 0.5s ease, opacity 0.5s ease",
+        transform: active ? "scale(1)" : "scale(0.92)",
+        opacity: active ? 1 : 0.5,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -51,9 +59,9 @@ function Card({ s }: { s: (typeof services)[number] }) {
       <div
         style={{
           position: "relative",
-          height: "380px",
+          height: "var(--card-h)",
           overflow: "hidden",
-          borderRadius: "6px",
+          borderRadius: "8px",
         }}
       >
         <Image
@@ -63,17 +71,17 @@ function Card({ s }: { s: (typeof services)[number] }) {
           style={{
             objectFit: "cover",
             transition: "transform 0.5s ease, filter 0.5s ease",
-            transform: hovered ? "scale(1.08)" : "scale(1)",
-            filter: hovered ? "brightness(1.15)" : "brightness(1)",
+            transform: lit ? "scale(1.06)" : "scale(1)",
+            filter: lit ? "brightness(1.1)" : "brightness(0.9)",
           }}
         />
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background: hovered
-              ? "linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.05) 50%, transparent 100%)"
-              : "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)",
+            background: active
+              ? "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%)"
+              : "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)",
             transition: "background 0.5s ease",
           }}
         />
@@ -85,12 +93,22 @@ function Card({ s }: { s: (typeof services)[number] }) {
               fontWeight: 500,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              marginBottom: "0.5rem",
+              marginBottom: "0.4rem",
             }}
           >
             {s.title}
           </h3>
-          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.8rem", lineHeight: 1.6 }}>{s.desc}</p>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "0.8rem",
+              lineHeight: 1.6,
+              transition: "opacity 0.4s ease",
+              opacity: active ? 1 : 0,
+            }}
+          >
+            {s.desc}
+          </p>
         </div>
       </div>
     </Link>
@@ -98,67 +116,62 @@ function Card({ s }: { s: (typeof services)[number] }) {
 }
 
 export default function ServicesCarousel() {
+  const [current, setCurrent] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
-  const posRef = useRef(0);
-  const pausedRef = useRef(false);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const CARD_W = 280;
-  const GAP = 20;
-  const SET_W = services.length * (CARD_W + GAP);
+  const count = services.length;
 
-  const wrap = useCallback(
-    (v: number) => ((v % SET_W) + SET_W) % SET_W,
-    [SET_W],
+  const goTo = useCallback(
+    (idx: number) => {
+      setCurrent(((idx % count) + count) % count);
+    },
+    [count],
   );
 
-  const applyPos = useCallback(() => {
-    const track = trackRef.current;
-    if (track) track.style.transform = `translateX(-${posRef.current}px)`;
-  }, []);
+  const next = useCallback(() => goTo(current + 1), [current, goTo]);
+  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
 
-  const scheduleResume = useCallback(() => {
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => {
-      pausedRef.current = false;
+  /* Autoplay: slide every 4s */
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCurrent((c) => (c + 1) % count);
     }, 4000);
-  }, []);
+  }, [count]);
 
-  /* Arrow navigation — jump one card */
-  const goNext = useCallback(() => {
-    pausedRef.current = true;
-    posRef.current = wrap(posRef.current + CARD_W + GAP);
-    applyPos();
-    scheduleResume();
-  }, [wrap, applyPos, scheduleResume, CARD_W, GAP]);
-
-  const goPrev = useCallback(() => {
-    pausedRef.current = true;
-    posRef.current = wrap(posRef.current - CARD_W - GAP);
-    applyPos();
-    scheduleResume();
-  }, [wrap, applyPos, scheduleResume, CARD_W, GAP]);
-
-  /* Autoplay */
   useEffect(() => {
-    const animate = () => {
-      if (!pausedRef.current) {
-        posRef.current = wrap(posRef.current + 0.5);
-        applyPos();
-      }
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
+    resetTimer();
     return () => {
-      cancelAnimationFrame(rafRef.current);
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [wrap, applyPos]);
+  }, [resetTimer]);
+
+  const handleArrow = (dir: "prev" | "next") => {
+    dir === "next" ? next() : prev();
+    resetTimer();
+  };
+
+  /*
+   * Position the track so that `current` card is centered.
+   * We use CSS custom properties for card width so it adapts.
+   * The offset formula: translateX = -(current * (cardW + gap))
+   * The wrapper has padding-left = 50% - cardW/2 to center the active card.
+   */
 
   return (
     <section
-      style={{ background: "#f8f8f8", overflow: "hidden", paddingTop: "5rem", paddingBottom: "5rem" }}
+      style={{
+        background: "#f8f8f8",
+        overflow: "hidden",
+        paddingTop: "5rem",
+        paddingBottom: "5rem",
+        // CSS custom props for responsive card sizing
+        // @ts-expect-error -- CSS custom properties
+        "--card-w": "min(70vw, 380px)",
+        "--card-h": "min(55vw, 440px)",
+        "--gap": "16px",
+      }}
     >
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "3rem", padding: "0 2rem" }}>
@@ -186,27 +199,27 @@ export default function ServicesCarousel() {
         </h2>
       </div>
 
-      {/* Carousel area */}
+      {/* Carousel */}
       <div style={{ position: "relative" }}>
-        {/* Track */}
         <div style={{ overflow: "hidden" }}>
           <div
             ref={trackRef}
             style={{
               display: "flex",
-              gap: `${GAP}px`,
-              willChange: "transform",
+              gap: "var(--gap)",
+              transition: "transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
+              transform: `translateX(calc(50% - var(--card-w) / 2 - ${current} * (var(--card-w) + var(--gap))))`,
             }}
           >
-            {items.map((s, i) => (
-              <Card key={`${s.title}-${i}`} s={s} />
+            {services.map((s, i) => (
+              <Card key={s.title} s={s} active={i === current} />
             ))}
           </div>
         </div>
 
         {/* Arrow left */}
         <button
-          onClick={goPrev}
+          onClick={() => handleArrow("prev")}
           aria-label="Précédent"
           style={{
             position: "absolute",
@@ -233,7 +246,7 @@ export default function ServicesCarousel() {
 
         {/* Arrow right */}
         <button
-          onClick={goNext}
+          onClick={() => handleArrow("next")}
           aria-label="Suivant"
           style={{
             position: "absolute",
@@ -257,6 +270,30 @@ export default function ServicesCarousel() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
+
+        {/* Dots */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "2rem" }}>
+          {services.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                goTo(i);
+                resetTimer();
+              }}
+              aria-label={`Soin ${i + 1}`}
+              style={{
+                width: current === i ? "24px" : "8px",
+                height: "8px",
+                borderRadius: "4px",
+                background: current === i ? "#000" : "#ccc",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                padding: 0,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
