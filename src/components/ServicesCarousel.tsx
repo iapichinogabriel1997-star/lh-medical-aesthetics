@@ -116,34 +116,94 @@ function Card({ s }: { s: (typeof services)[number] }) {
 
 export default function ServicesCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const posRef = useRef(0);
-  const speed = 0.5; /* px per frame */
+  const pausedRef = useRef(false);
+  const draggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startPosRef = useRef(0);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const speed = 0.5;
 
-  useEffect(() => {
+  const cardWidth = 300;
+  const gap = 24;
+  const setWidth = services.length * (cardWidth + gap);
+
+  /* wrap position so it stays in [0, setWidth) */
+  const wrap = (v: number) => ((v % setWidth) + setWidth) % setWidth;
+
+  const applyPos = () => {
     const track = trackRef.current;
-    if (!track) return;
+    if (track) track.style.transform = `translateX(-${posRef.current}px)`;
+  };
 
-    /* width of the first set (4 cards + gaps) */
-    const cardWidth = 300;
-    const gap = 24; /* 1.5rem ≈ 24px */
-    const setWidth = services.length * (cardWidth + gap);
+  /* schedule autoplay resume after user interaction */
+  const scheduleResume = () => {
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      pausedRef.current = false;
+    }, 2500);
+  };
 
+  /* ── mouse drag ── */
+  const onMouseDown = (e: React.MouseEvent) => {
+    draggingRef.current = true;
+    pausedRef.current = true;
+    startXRef.current = e.clientX;
+    startPosRef.current = posRef.current;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!draggingRef.current) return;
+    const delta = startXRef.current - e.clientX;
+    posRef.current = wrap(startPosRef.current + delta);
+    applyPos();
+  };
+
+  const onMouseUp = () => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    scheduleResume();
+  };
+
+  /* ── touch swipe ── */
+  const onTouchStart = (e: React.TouchEvent) => {
+    pausedRef.current = true;
+    draggingRef.current = true;
+    startXRef.current = e.touches[0].clientX;
+    startPosRef.current = posRef.current;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!draggingRef.current) return;
+    const delta = startXRef.current - e.touches[0].clientX;
+    posRef.current = wrap(startPosRef.current + delta);
+    applyPos();
+  };
+
+  const onTouchEnd = () => {
+    draggingRef.current = false;
+    scheduleResume();
+  };
+
+  /* ── autoplay loop ── */
+  useEffect(() => {
     const animate = () => {
-      if (!paused) {
-        posRef.current += speed;
-        if (posRef.current >= setWidth) {
-          posRef.current -= setWidth;
-        }
-        track.style.transform = `translateX(-${posRef.current}px)`;
+      if (!pausedRef.current) {
+        posRef.current = wrap(posRef.current + speed);
+        applyPos();
       }
       rafRef.current = requestAnimationFrame(animate);
     };
-
     rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [paused]);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
 
   return (
     <section
@@ -178,9 +238,20 @@ export default function ServicesCarousel() {
 
       {/* Track wrapper */}
       <div
-        style={{ overflow: "hidden", cursor: "grab" }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
+        ref={wrapperRef}
+        style={{
+          overflow: "hidden",
+          cursor: draggingRef.current ? "grabbing" : "grab",
+          touchAction: "pan-y",
+          userSelect: "none",
+        }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         <div
           ref={trackRef}
@@ -188,6 +259,7 @@ export default function ServicesCarousel() {
             display: "flex",
             gap: "1.5rem",
             willChange: "transform",
+            pointerEvents: draggingRef.current ? "none" : "auto",
           }}
         >
           {items.map((s, i) => (
