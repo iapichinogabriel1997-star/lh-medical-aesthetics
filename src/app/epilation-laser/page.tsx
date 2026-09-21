@@ -234,15 +234,35 @@ export default function EpilationLaserPage() {
             <h2 className="section-title">Galerie</h2>
           </AnimateOnScroll>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", overflow: "hidden" }}>
-          {gallery.map((img, i) => (
-            <AnimateOnScroll
-              key={img.src}
-              animation="fade-up"
-              delay={i * 0.1}
-              style={{ flex: "1 0 0", position: "relative", minHeight: "420px" }}
-            >
-              <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "0.5rem",
+            padding: "0 1rem",
+          }}
+        >
+          {gallery.slice(0, 3).map((img, i) => (
+            <AnimateOnScroll key={img.src} animation="fade-up" delay={i * 0.1}>
+              <div style={{ position: "relative", height: "clamp(250px, 40vw, 450px)", overflow: "hidden" }}>
+                <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
+              </div>
+            </AnimateOnScroll>
+          ))}
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "0.5rem",
+            padding: "0.5rem 1rem 0",
+          }}
+        >
+          {gallery.slice(3, 5).map((img, i) => (
+            <AnimateOnScroll key={img.src} animation="fade-up" delay={0.3 + i * 0.1}>
+              <div style={{ position: "relative", height: "clamp(200px, 35vw, 380px)", overflow: "hidden" }}>
+                <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
+              </div>
             </AnimateOnScroll>
           ))}
         </div>
