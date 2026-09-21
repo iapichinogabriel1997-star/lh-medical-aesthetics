@@ -179,16 +179,39 @@ export default function CryoPage() {
       </section>
 
       {/* ═══════ CRYOLIPOLYSE ═══════ */}
-      <section className="section-padding" style={{ background: "#f8f8f8" }}>
+      {/* Mobile */}
+      <section
+        className="md:hidden"
+        style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+      >
+        <Image src="/images/cryo/3.webp" alt="Cryolipolyse" fill style={{ objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
+        <div style={{ position: "relative", zIndex: 10, padding: "2rem 1.5rem 3rem", color: "#fff" }}>
+          <AnimateOnScroll animation="fade-up">
+            <span style={{ display: "inline-block", padding: "0.35rem 1rem", background: "#fff", color: "#000", fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: "1.2rem" }}>Traitement 01</span>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="blur-in" delay={0.1}>
+            <h2 style={{ fontSize: "1.8rem", fontWeight: 200, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", lineHeight: 1.3 }}>Cryolipolyse</h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="fade-up" delay={0.2}>
+            <p style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: "1.2rem", fontSize: "0.9rem" }}>
+              Le froid contrôlé cristallise et détruit les cellules graisseuses. Jusqu&apos;à 30% de réduction dès la première séance, sans chirurgie.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {["25 à 30% de réduction par séance", "Résultats définitifs", "Aucun temps de récupération"].map((item) => (
+                <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "0.6rem" }}>
+                  <svg style={{ width: "16px", height: "16px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#fff" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <span style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.85rem" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </AnimateOnScroll>
+        </div>
+      </section>
+      {/* Desktop */}
+      <section className="section-padding hidden md:!block" style={{ background: "#f8f8f8" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "4rem",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
             <AnimateOnScroll animation="fade-right">
               <div style={{ position: "relative", height: "550px", overflow: "hidden" }}>
                 <Image src="/images/cryo/3.webp" alt="Cryolipolyse traitement" fill style={{ objectFit: "cover" }} />
@@ -196,63 +219,23 @@ export default function CryoPage() {
             </AnimateOnScroll>
             <div>
               <AnimateOnScroll animation="fade-up">
-                <p
-                  style={{
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.3em",
-                    textTransform: "uppercase",
-                    color: "#999",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Traitement 01
-                </p>
+                <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>Traitement 01</p>
               </AnimateOnScroll>
               <AnimateOnScroll animation="blur-in" delay={0.1}>
-                <h2
-                  style={{
-                    fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
-                    fontWeight: 200,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    marginBottom: "2rem",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Cryolipolyse
-                </h2>
+                <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.8rem)", fontWeight: 200, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "2rem", lineHeight: 1.3 }}>Cryolipolyse</h2>
               </AnimateOnScroll>
               <AnimateOnScroll animation="fade-up" delay={0.2}>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "1.5rem" }}>
                   La cryolipolyse est une technique révolutionnaire qui utilise le{" "}
-                  <strong>froid contrôlé pour cristalliser et détruire les cellules graisseuses</strong>. Les
-                  adipocytes ainsi traités sont ensuite éliminés naturellement par l&apos;organisme au fil des semaines.
+                  <strong>froid contrôlé pour cristalliser et détruire les cellules graisseuses</strong>. Les adipocytes ainsi traités sont ensuite éliminés naturellement par l&apos;organisme au fil des semaines.
                 </p>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "2rem" }}>
-                  Ce traitement cible précisément les amas graisseux résistants aux régimes et au sport. Le froid est
-                  appliqué de manière contrôlée, ne touchant que les cellules graisseuses sans endommager les tissus
-                  environnants. <strong>Jusqu&apos;à 30% de réduction de la couche graisseuse</strong> dès la première
-                  séance.
+                  Ce traitement cible précisément les amas graisseux résistants aux régimes et au sport. <strong>Jusqu&apos;à 30% de réduction de la couche graisseuse</strong> dès la première séance.
                 </p>
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0" }}>
-                  {[
-                    "Réduction de 25 à 30% de la graisse par séance",
-                    "Résultats définitifs — les cellules détruites ne reviennent pas",
-                    "Séance de 35 à 60 minutes selon la zone",
-                    "Aucun temps de récupération",
-                  ].map((item) => (
-                    <li
-                      key={item}
-                      style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}
-                    >
-                      <svg
-                        style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }}
-                        fill="none"
-                        stroke="#000"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {["Réduction de 25 à 30% de la graisse par séance", "Résultats définitifs — les cellules détruites ne reviennent pas", "Séance de 35 à 60 minutes selon la zone", "Aucun temps de récupération"].map((item) => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}>
+                      <svg style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#000" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       <span style={{ color: "#555", fontSize: "0.9rem" }}>{item}</span>
                     </li>
                   ))}
@@ -264,75 +247,57 @@ export default function CryoPage() {
       </section>
 
       {/* ═══════ RADIOFRÉQUENCE ═══════ */}
-      <section className="section-padding" style={{ background: "#fff" }}>
+      {/* Mobile */}
+      <section
+        className="md:hidden"
+        style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+      >
+        <Image src="/images/cryo/2.webp" alt="Radiofréquence" fill style={{ objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
+        <div style={{ position: "relative", zIndex: 10, padding: "2rem 1.5rem 3rem", color: "#fff" }}>
+          <AnimateOnScroll animation="fade-up">
+            <span style={{ display: "inline-block", padding: "0.35rem 1rem", background: "#fff", color: "#000", fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: "1.2rem" }}>Traitement 02</span>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="blur-in" delay={0.1}>
+            <h2 style={{ fontSize: "1.8rem", fontWeight: 200, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", lineHeight: 1.3 }}>Radiofréquence</h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="fade-up" delay={0.2}>
+            <p style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: "1.2rem", fontSize: "0.9rem" }}>
+              Les ondes électromagnétiques chauffent les couches profondes de la peau pour stimuler le collagène. La peau se raffermit et la cellulite s&apos;atténue.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {["Raffermissement dès la 1ère séance", "Stimulation naturelle du collagène", "Réduction de la cellulite"].map((item) => (
+                <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "0.6rem" }}>
+                  <svg style={{ width: "16px", height: "16px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#fff" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <span style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.85rem" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </AnimateOnScroll>
+        </div>
+      </section>
+      {/* Desktop */}
+      <section className="section-padding hidden md:!block" style={{ background: "#fff" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "4rem",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
             <div>
               <AnimateOnScroll animation="fade-up">
-                <p
-                  style={{
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.3em",
-                    textTransform: "uppercase",
-                    color: "#999",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Traitement 02
-                </p>
+                <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>Traitement 02</p>
               </AnimateOnScroll>
               <AnimateOnScroll animation="blur-in" delay={0.1}>
-                <h2
-                  style={{
-                    fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
-                    fontWeight: 200,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    marginBottom: "2rem",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Radiofréquence
-                </h2>
+                <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.8rem)", fontWeight: 200, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "2rem", lineHeight: 1.3 }}>Radiofréquence</h2>
               </AnimateOnScroll>
               <AnimateOnScroll animation="fade-up" delay={0.2}>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "1.5rem" }}>
-                  La radiofréquence utilise des{" "}
-                  <strong>ondes électromagnétiques pour chauffer les couches profondes de la peau</strong>, stimulant
-                  ainsi la production de collagène et d&apos;élastine. La peau se raffermit, se retend et retrouve son
-                  élasticité.
+                  La radiofréquence utilise des <strong>ondes électromagnétiques pour chauffer les couches profondes de la peau</strong>, stimulant ainsi la production de collagène et d&apos;élastine. La peau se raffermit, se retend et retrouve son élasticité.
                 </p>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "2rem" }}>
-                  C&apos;est le complément idéal de la cryolipolyse : après avoir éliminé la graisse, la radiofréquence
-                  retend la peau pour un résultat harmonieux et naturel. Elle est également très efficace contre la{" "}
-                  <strong>cellulite et le relâchement cutané</strong>.
+                  C&apos;est le complément idéal de la cryolipolyse : après avoir éliminé la graisse, la radiofréquence retend la peau pour un résultat harmonieux. Elle est très efficace contre la <strong>cellulite et le relâchement cutané</strong>.
                 </p>
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0" }}>
-                  {[
-                    "Raffermissement visible dès la première séance",
-                    "Stimulation naturelle du collagène",
-                    "Réduction de la cellulite",
-                    "Soin agréable — sensation de chaleur douce",
-                  ].map((item) => (
-                    <li
-                      key={item}
-                      style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}
-                    >
-                      <svg
-                        style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }}
-                        fill="none"
-                        stroke="#000"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {["Raffermissement visible dès la première séance", "Stimulation naturelle du collagène", "Réduction de la cellulite", "Soin agréable — sensation de chaleur douce"].map((item) => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}>
+                      <svg style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#000" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       <span style={{ color: "#555", fontSize: "0.9rem" }}>{item}</span>
                     </li>
                   ))}
@@ -341,12 +306,7 @@ export default function CryoPage() {
             </div>
             <AnimateOnScroll animation="fade-left">
               <div style={{ position: "relative", height: "550px", overflow: "hidden" }}>
-                <Image
-                  src="/images/cryo/2.webp"
-                  alt="Radiofréquence traitement"
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
+                <Image src="/images/cryo/2.webp" alt="Radiofréquence traitement" fill style={{ objectFit: "cover" }} />
               </div>
             </AnimateOnScroll>
           </div>
@@ -354,84 +314,62 @@ export default function CryoPage() {
       </section>
 
       {/* ═══════ LIPOCAVITATION ═══════ */}
-      <section className="section-padding" style={{ background: "#f8f8f8" }}>
+      {/* Mobile */}
+      <section
+        className="md:hidden"
+        style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+      >
+        <Image src="/images/cryo/1.webp" alt="Lipocavitation" fill style={{ objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
+        <div style={{ position: "relative", zIndex: 10, padding: "2rem 1.5rem 3rem", color: "#fff" }}>
+          <AnimateOnScroll animation="fade-up">
+            <span style={{ display: "inline-block", padding: "0.35rem 1rem", background: "#fff", color: "#000", fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: "1.2rem" }}>Traitement 03</span>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="blur-in" delay={0.1}>
+            <h2 style={{ fontSize: "1.8rem", fontWeight: 200, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", lineHeight: 1.3 }}>Lipocavitation</h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="fade-up" delay={0.2}>
+            <p style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: "1.2rem", fontSize: "0.9rem" }}>
+              Les ultrasons basse fréquence fragmentent les cellules graisseuses de manière ciblée. Une alternative non chirurgicale à la liposuccion.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {["Destruction ciblée par ultrasons", "Alternative à la liposuccion", "Résultats dès les 1ères séances"].map((item) => (
+                <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "0.6rem" }}>
+                  <svg style={{ width: "16px", height: "16px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#fff" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <span style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.85rem" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </AnimateOnScroll>
+        </div>
+      </section>
+      {/* Desktop */}
+      <section className="section-padding hidden md:!block" style={{ background: "#f8f8f8" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "4rem",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
             <AnimateOnScroll animation="fade-right">
               <div style={{ position: "relative", height: "550px", overflow: "hidden" }}>
-                <Image
-                  src="/images/cryo/1.webp"
-                  alt="Lipocavitation traitement"
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
+                <Image src="/images/cryo/1.webp" alt="Lipocavitation traitement" fill style={{ objectFit: "cover" }} />
               </div>
             </AnimateOnScroll>
             <div>
               <AnimateOnScroll animation="fade-up">
-                <p
-                  style={{
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.3em",
-                    textTransform: "uppercase",
-                    color: "#999",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Traitement 03
-                </p>
+                <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>Traitement 03</p>
               </AnimateOnScroll>
               <AnimateOnScroll animation="blur-in" delay={0.1}>
-                <h2
-                  style={{
-                    fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
-                    fontWeight: 200,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    marginBottom: "2rem",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Lipocavitation
-                </h2>
+                <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.8rem)", fontWeight: 200, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "2rem", lineHeight: 1.3 }}>Lipocavitation</h2>
               </AnimateOnScroll>
               <AnimateOnScroll animation="fade-up" delay={0.2}>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "1.5rem" }}>
-                  La lipocavitation utilise des{" "}
-                  <strong>ultrasons basse fréquence pour fragmenter les cellules graisseuses</strong> de manière ciblée.
-                  Les graisses libérées sont ensuite drainées naturellement par le système lymphatique.
+                  La lipocavitation utilise des <strong>ultrasons basse fréquence pour fragmenter les cellules graisseuses</strong> de manière ciblée. Les graisses libérées sont ensuite drainées naturellement par le système lymphatique.
                 </p>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "2rem" }}>
-                  C&apos;est une <strong>alternative non chirurgicale à la liposuccion</strong>, idéale en complément de
-                  la cryolipolyse et de la radiofréquence pour un remodelage corporel complet. Les ultrasons permettent
-                  un traitement précis et un affinement progressif de la silhouette.
+                  C&apos;est une <strong>alternative non chirurgicale à la liposuccion</strong>, idéale en complément de la cryolipolyse et de la radiofréquence pour un remodelage corporel complet.
                 </p>
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0" }}>
-                  {[
-                    "Destruction ciblée des graisses par ultrasons",
-                    "Alternative non chirurgicale à la liposuccion",
-                    "Résultats visibles dès les premières séances",
-                    "Drainage et remodelage corporel sur-mesure",
-                  ].map((item) => (
-                    <li
-                      key={item}
-                      style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}
-                    >
-                      <svg
-                        style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }}
-                        fill="none"
-                        stroke="#000"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {["Destruction ciblée des graisses par ultrasons", "Alternative non chirurgicale à la liposuccion", "Résultats visibles dès les premières séances", "Drainage et remodelage corporel sur-mesure"].map((item) => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}>
+                      <svg style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#000" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       <span style={{ color: "#555", fontSize: "0.9rem" }}>{item}</span>
                     </li>
                   ))}
