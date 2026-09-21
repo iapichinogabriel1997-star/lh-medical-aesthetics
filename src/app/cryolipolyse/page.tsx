@@ -182,7 +182,7 @@ export default function CryoPage() {
       {/* Mobile */}
       <section
         className="md:hidden"
-        style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+        style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
       >
         <Image src="/images/cryo/3.webp" alt="Cryolipolyse" fill style={{ objectFit: "cover" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
@@ -250,7 +250,7 @@ export default function CryoPage() {
       {/* Mobile */}
       <section
         className="md:hidden"
-        style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+        style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
       >
         <Image src="/images/cryo/2.webp" alt="Radiofréquence" fill style={{ objectFit: "cover" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
@@ -317,7 +317,7 @@ export default function CryoPage() {
       {/* Mobile */}
       <section
         className="md:hidden"
-        style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+        style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
       >
         <Image src="/images/cryo/1.webp" alt="Lipocavitation" fill style={{ objectFit: "cover" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
