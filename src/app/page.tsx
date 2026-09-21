@@ -165,39 +165,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ GALERIE ═══════════ */}
-      <section className="section-padding" style={{ background: "#f8f8f8" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <AnimateOnScroll animation="fade-up">
-              <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>
-                En images
-              </p>
+      {/* ═══════════ PANORAMIQUE ÉPILATION LASER ═══════════ */}
+      <section style={{ background: "#f8f8f8", padding: "5rem 0" }}>
+        <div style={{ textAlign: "center", marginBottom: "3rem", padding: "0 2rem" }}>
+          <AnimateOnScroll animation="fade-up">
+            <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>
+              En images
+            </p>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="blur-in" delay={0.15}>
+            <h2 className="section-title">Épilation Laser</h2>
+          </AnimateOnScroll>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            overflow: "hidden",
+          }}
+        >
+          {[
+            { src: "/images/laser/1.webp", alt: "Épilation laser aisselles" },
+            { src: "/images/laser/2.webp", alt: "Épilation laser jambes" },
+            { src: "/images/laser/3.webp", alt: "Traitement laser corps" },
+            { src: "/images/laser/4.webp", alt: "Écran technologie laser" },
+            { src: "/images/laser/5.webp", alt: "Pièce à main laser" },
+          ].map((img, i) => (
+            <AnimateOnScroll key={img.src} animation="fade-up" delay={i * 0.1} style={{ flex: "1 0 0", position: "relative", minHeight: "400px" }}>
+              <Link href="/epilation-laser">
+                <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
+              </Link>
             </AnimateOnScroll>
-            <AnimateOnScroll animation="blur-in" delay={0.15}>
-              <h2 className="section-title">Notre expertise</h2>
-            </AnimateOnScroll>
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gridTemplateRows: "1fr 1fr",
-              gap: "0.5rem",
-              maxWidth: "1000px",
-              margin: "0 auto",
-            }}
-          >
-            <AnimateOnScroll animation="fade-right" style={{ gridRow: "1 / 3", position: "relative", minHeight: "500px", overflow: "hidden" }}>
-              <Image src="/images/7.webp" alt="Traitement laser aisselles" fill style={{ objectFit: "cover" }} />
-            </AnimateOnScroll>
-            <AnimateOnScroll animation="fade-left" delay={0.2} style={{ position: "relative", minHeight: "245px", overflow: "hidden" }}>
-              <Image src="/images/1.webp" alt="Traitement laser" fill style={{ objectFit: "cover" }} />
-            </AnimateOnScroll>
-            <AnimateOnScroll animation="fade-left" delay={0.35} style={{ position: "relative", minHeight: "245px", overflow: "hidden" }}>
-              <Image src="/images/2.webp" alt="Jambes lisses" fill style={{ objectFit: "cover" }} />
-            </AnimateOnScroll>
-          </div>
+          ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+          <AnimateOnScroll animation="fade-up" delay={0.3}>
+            <Link href="/epilation-laser" className="btn-primary">
+              Découvrir l&apos;épilation laser
+            </Link>
+          </AnimateOnScroll>
         </div>
       </section>
 

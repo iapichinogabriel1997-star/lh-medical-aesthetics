@@ -8,8 +8,8 @@ const services = [
   {
     title: "Épilation Laser",
     desc: "Technologie Laser-Pro 4 longueurs d'ondes pour tous les types de peaux.",
-    img: "/images/1.webp",
-    href: "/services",
+    img: "/images/laser/1.webp",
+    href: "/epilation-laser",
   },
   {
     title: "Cryolipolyse",
