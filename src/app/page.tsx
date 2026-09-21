@@ -71,68 +71,92 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ AVANTAGES ═══════════ */}
+      {/* ═══════════ NOUVEAU SOIN — CRYOLIPOLYSE ═══════════ */}
       <section className="section-padding" style={{ background: "#fff" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <AnimateOnScroll animation="fade-up">
-              <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>
-                Nos avantages
-              </p>
-            </AnimateOnScroll>
-            <AnimateOnScroll animation="fade-up" delay={0.15}>
-              <h2 className="section-title">Pourquoi nous choisir</h2>
-            </AnimateOnScroll>
-          </div>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "3rem",
+              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+              gap: "4rem",
+              alignItems: "center",
             }}
           >
-            {[
-              {
-                title: "Technologie avancée",
-                desc: "Laser-Pro de Divina-Pro avec 4 longueurs d'ondes complémentaires pour cibler tous les types de poils et de peaux.",
-                icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
-              },
-              {
-                title: "Résultats visibles",
-                desc: "Des résultats dès les premières séances pour un résultat durable et sans douleur.",
-                icon: "M5 13l4 4L19 7",
-              },
-              {
-                title: "Pour tous",
-                desc: "Adaptée aussi bien aux femmes qu'aux hommes, y compris les peaux les plus claires et les plus foncées.",
-                icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
-              },
-            ].map((item, i) => (
-              <AnimateOnScroll key={item.title} animation="fade-up" delay={i * 0.15}>
-                <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
-                  <div
-                    style={{
-                      width: "70px",
-                      height: "70px",
-                      margin: "0 auto 1.5rem",
-                      border: "1px solid #e0e0e0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transition: "all 0.4s ease",
-                    }}
-                  >
-                    <svg style={{ width: "28px", height: "28px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d={item.icon} />
-                    </svg>
-                  </div>
-                  <h3 style={{ fontSize: "0.85rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "1rem" }}>
-                    {item.title}
-                  </h3>
-                  <p style={{ color: "#777", fontSize: "0.9rem", lineHeight: 1.8 }}>{item.desc}</p>
-                </div>
+            <AnimateOnScroll animation="fade-right">
+              <div style={{ position: "relative", height: "550px", overflow: "hidden" }}>
+                <Image src="/images/cryo/3.webp" alt="Cryolipolyse traitement" fill style={{ objectFit: "cover" }} />
+              </div>
+            </AnimateOnScroll>
+            <div>
+              <AnimateOnScroll animation="fade-up">
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "0.4rem 1.2rem",
+                    background: "#000",
+                    color: "#fff",
+                    fontSize: "0.65rem",
+                    letterSpacing: "0.25em",
+                    textTransform: "uppercase",
+                    marginBottom: "1.5rem",
+                  }}
+                >
+                  Nouveau soin
+                </span>
               </AnimateOnScroll>
-            ))}
+              <AnimateOnScroll animation="blur-in" delay={0.1}>
+                <h2
+                  style={{
+                    fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+                    fontWeight: 200,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    marginBottom: "2rem",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  Découvrez la Cryolipolyse
+                </h2>
+              </AnimateOnScroll>
+              <AnimateOnScroll animation="fade-up" delay={0.2}>
+                <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "1.5rem" }}>
+                  Éliminez les <strong>graisses tenaces</strong> sans chirurgie grâce au froid. La
+                  cryolipolyse cristallise les cellules graisseuses qui sont ensuite éliminées
+                  naturellement par votre organisme.
+                </p>
+                <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "2rem" }}>
+                  Combinée à la <strong>radiofréquence</strong> et à la{" "}
+                  <strong>lipocavitation</strong>, nous proposons un programme complet de remodelage
+                  corporel adapté à vos objectifs.
+                </p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0" }}>
+                  {[
+                    "Jusqu'à 30% de réduction de graisse par séance",
+                    "Résultats définitifs et sans douleur",
+                    "3 technologies complémentaires",
+                    "Consultation personnalisée offerte",
+                  ].map((item) => (
+                    <li
+                      key={item}
+                      style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}
+                    >
+                      <svg
+                        style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }}
+                        fill="none"
+                        stroke="#000"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span style={{ color: "#555", fontSize: "0.9rem" }}>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/cryolipolyse" className="btn-primary">
+                  En savoir plus
+                </Link>
+              </AnimateOnScroll>
+            </div>
           </div>
         </div>
       </section>
