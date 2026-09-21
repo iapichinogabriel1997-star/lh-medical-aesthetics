@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 
 const services = [
   {
@@ -31,7 +31,6 @@ const services = [
   },
 ];
 
-/* duplicate the list so the track is wide enough for seamless looping */
 const items = [...services, ...services];
 
 function Card({ s }: { s: (typeof services)[number] }) {
@@ -41,7 +40,7 @@ function Card({ s }: { s: (typeof services)[number] }) {
     <Link
       href={s.href}
       style={{
-        flex: "0 0 300px",
+        flex: "0 0 280px",
         textDecoration: "none",
         color: "inherit",
         display: "block",
@@ -52,7 +51,7 @@ function Card({ s }: { s: (typeof services)[number] }) {
       <div
         style={{
           position: "relative",
-          height: "400px",
+          height: "380px",
           overflow: "hidden",
           borderRadius: "6px",
         }}
@@ -78,15 +77,7 @@ function Card({ s }: { s: (typeof services)[number] }) {
             transition: "background 0.5s ease",
           }}
         />
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: "1.5rem",
-          }}
-        >
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "1.5rem" }}>
           <h3
             style={{
               color: "#fff",
@@ -99,15 +90,7 @@ function Card({ s }: { s: (typeof services)[number] }) {
           >
             {s.title}
           </h3>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.7)",
-              fontSize: "0.8rem",
-              lineHeight: 1.6,
-            }}
-          >
-            {s.desc}
-          </p>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.8rem", lineHeight: 1.6 }}>{s.desc}</p>
         </div>
       </div>
     </Link>
@@ -116,84 +99,125 @@ function Card({ s }: { s: (typeof services)[number] }) {
 
 export default function ServicesCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const posRef = useRef(0);
   const pausedRef = useRef(false);
   const draggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const startPosRef = useRef(0);
+  const dragStartXRef = useRef(0);
+  const dragStartYRef = useRef(0);
+  const dragStartPosRef = useRef(0);
+  const dragDistRef = useRef(0);
+  const lockedAxisRef = useRef<"x" | "y" | null>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const speed = 0.5;
 
-  const cardWidth = 300;
-  const gap = 24;
-  const setWidth = services.length * (cardWidth + gap);
+  const CARD_W = 280;
+  const GAP = 20;
+  const SET_W = services.length * (CARD_W + GAP);
 
-  /* wrap position so it stays in [0, setWidth) */
-  const wrap = (v: number) => ((v % setWidth) + setWidth) % setWidth;
+  const wrap = useCallback(
+    (v: number) => ((v % SET_W) + SET_W) % SET_W,
+    [SET_W],
+  );
 
-  const applyPos = () => {
+  const applyPos = useCallback(() => {
     const track = trackRef.current;
     if (track) track.style.transform = `translateX(-${posRef.current}px)`;
-  };
+  }, []);
 
-  /* schedule autoplay resume after user interaction */
-  const scheduleResume = () => {
+  const scheduleResume = useCallback(() => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = setTimeout(() => {
       pausedRef.current = false;
-    }, 2500);
-  };
+    }, 3000);
+  }, []);
+
+  /* ── pointer events (mouse + touch unified) ── */
+  const onDown = useCallback((clientX: number, clientY: number) => {
+    draggingRef.current = true;
+    pausedRef.current = true;
+    dragStartXRef.current = clientX;
+    dragStartYRef.current = clientY;
+    dragStartPosRef.current = posRef.current;
+    dragDistRef.current = 0;
+    lockedAxisRef.current = null;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+  }, []);
+
+  const onMove = useCallback(
+    (clientX: number, clientY: number, e: Event) => {
+      if (!draggingRef.current) return;
+
+      const dx = dragStartXRef.current - clientX;
+      const dy = dragStartYRef.current - clientY;
+
+      /* Lock axis after 8px of movement to decide scroll vs swipe */
+      if (!lockedAxisRef.current) {
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+          lockedAxisRef.current = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+        }
+        return;
+      }
+
+      /* If vertical scroll, release control */
+      if (lockedAxisRef.current === "y") {
+        draggingRef.current = false;
+        scheduleResume();
+        return;
+      }
+
+      /* Horizontal swipe — prevent page scroll and move carousel */
+      e.preventDefault();
+      dragDistRef.current = dx;
+      posRef.current = wrap(dragStartPosRef.current + dx);
+      applyPos();
+    },
+    [wrap, applyPos, scheduleResume],
+  );
+
+  const onUp = useCallback(() => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    lockedAxisRef.current = null;
+    scheduleResume();
+  }, [scheduleResume]);
+
+  /* Attach touch listeners with { passive: false } so we can preventDefault */
+  useEffect(() => {
+    const el = trackRef.current?.parentElement;
+    if (!el) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      onDown(t.clientX, t.clientY);
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      onMove(t.clientX, t.clientY, e);
+    };
+    const handleTouchEnd = () => onUp();
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    el.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [onDown, onMove, onUp]);
 
   /* ── mouse drag ── */
-  const onMouseDown = (e: React.MouseEvent) => {
-    draggingRef.current = true;
-    pausedRef.current = true;
-    startXRef.current = e.clientX;
-    startPosRef.current = posRef.current;
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-  };
+  const onMouseDown = (e: React.MouseEvent) => onDown(e.clientX, e.clientY);
+  const onMouseMove = (e: React.MouseEvent) =>
+    onMove(e.clientX, e.clientY, e.nativeEvent);
+  const onMouseUp = () => onUp();
 
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!draggingRef.current) return;
-    const delta = startXRef.current - e.clientX;
-    posRef.current = wrap(startPosRef.current + delta);
-    applyPos();
-  };
-
-  const onMouseUp = () => {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    scheduleResume();
-  };
-
-  /* ── touch swipe ── */
-  const onTouchStart = (e: React.TouchEvent) => {
-    pausedRef.current = true;
-    draggingRef.current = true;
-    startXRef.current = e.touches[0].clientX;
-    startPosRef.current = posRef.current;
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (!draggingRef.current) return;
-    const delta = startXRef.current - e.touches[0].clientX;
-    posRef.current = wrap(startPosRef.current + delta);
-    applyPos();
-  };
-
-  const onTouchEnd = () => {
-    draggingRef.current = false;
-    scheduleResume();
-  };
-
-  /* ── autoplay loop ── */
+  /* ── autoplay ── */
   useEffect(() => {
     const animate = () => {
       if (!pausedRef.current) {
-        posRef.current = wrap(posRef.current + speed);
+        posRef.current = wrap(posRef.current + 0.5);
         applyPos();
       }
       rafRef.current = requestAnimationFrame(animate);
@@ -203,14 +227,13 @@ export default function ServicesCarousel() {
       cancelAnimationFrame(rafRef.current);
       if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     };
-  }, []);
+  }, [wrap, applyPos]);
 
   return (
     <section
       className="section-padding"
       style={{ background: "#f8f8f8", overflow: "hidden" }}
     >
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "3rem" }}>
         <p
           style={{
@@ -236,30 +259,23 @@ export default function ServicesCarousel() {
         </h2>
       </div>
 
-      {/* Track wrapper */}
       <div
-        ref={wrapperRef}
         style={{
           overflow: "hidden",
-          cursor: draggingRef.current ? "grabbing" : "grab",
-          touchAction: "pan-y",
+          cursor: "grab",
           userSelect: "none",
         }}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
       >
         <div
           ref={trackRef}
           style={{
             display: "flex",
-            gap: "1.5rem",
+            gap: `${GAP}px`,
             willChange: "transform",
-            pointerEvents: draggingRef.current ? "none" : "auto",
           }}
         >
           {items.map((s, i) => (

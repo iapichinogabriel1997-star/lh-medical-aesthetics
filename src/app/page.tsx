@@ -166,7 +166,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════ PANORAMIQUE ÉPILATION LASER ═══════════ */}
-      <section style={{ background: "#f8f8f8", padding: "5rem 0" }}>
+      <section style={{ background: "#f8f8f8", padding: "5rem 0", overflow: "hidden" }}>
         <div style={{ textAlign: "center", marginBottom: "3rem", padding: "0 2rem" }}>
           <AnimateOnScroll animation="fade-up">
             <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>
@@ -179,20 +179,38 @@ export default function Home() {
         </div>
         <div
           style={{
-            display: "flex",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
             gap: "0.5rem",
-            overflow: "hidden",
+            padding: "0 1rem",
           }}
         >
           {[
             { src: "/images/laser/1.webp", alt: "Épilation laser aisselles" },
             { src: "/images/laser/2.webp", alt: "Épilation laser jambes" },
             { src: "/images/laser/3.webp", alt: "Traitement laser corps" },
+          ].map((img, i) => (
+            <AnimateOnScroll key={img.src} animation="fade-up" delay={i * 0.1}>
+              <Link href="/epilation-laser" style={{ display: "block", position: "relative", height: "clamp(250px, 40vw, 450px)", overflow: "hidden" }}>
+                <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
+              </Link>
+            </AnimateOnScroll>
+          ))}
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "0.5rem",
+            padding: "0.5rem 1rem 0",
+          }}
+        >
+          {[
             { src: "/images/laser/4.webp", alt: "Écran technologie laser" },
             { src: "/images/laser/5.webp", alt: "Pièce à main laser" },
           ].map((img, i) => (
-            <AnimateOnScroll key={img.src} animation="fade-up" delay={i * 0.1} style={{ flex: "1 0 0", position: "relative", minHeight: "400px" }}>
-              <Link href="/epilation-laser">
+            <AnimateOnScroll key={img.src} animation="fade-up" delay={0.3 + i * 0.1}>
+              <Link href="/epilation-laser" style={{ display: "block", position: "relative", height: "clamp(200px, 35vw, 380px)", overflow: "hidden" }}>
                 <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
               </Link>
             </AnimateOnScroll>
