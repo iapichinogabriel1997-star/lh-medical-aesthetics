@@ -31,10 +31,10 @@ const processSteps = [
 ];
 
 const beforeAfter = [
-  { src: "/images/cryo/6.webp", alt: "Résultat cryolipolyse ventre" },
-  { src: "/images/cryo/7.webp", alt: "Mesure pli cutané avant/après" },
-  { src: "/images/cryo/5.webp", alt: "Réduction cellulite" },
-  { src: "/images/cryo/4.webp", alt: "Résultat cryolipolyse séance" },
+  { src: "/images/cryo/ba1.webp", alt: "Cuisses & fessiers", zone: "Cuisses" },
+  { src: "/images/cryo/ba2.webp", alt: "Fessiers profil", zone: "Fessiers" },
+  { src: "/images/cryo/ba3.webp", alt: "Ventre profil", zone: "Ventre" },
+  { src: "/images/cryo/ba4.webp", alt: "Ventre face", zone: "Abdomen" },
 ];
 
 const zones = [
@@ -444,7 +444,7 @@ export default function CryoPage() {
 
       {/* ═══════ AVANT / APRÈS ═══════ */}
       <section className="section-padding" style={{ background: "#fff" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
             <AnimateOnScroll animation="fade-up">
               <p
@@ -456,54 +456,286 @@ export default function CryoPage() {
                   marginBottom: "1rem",
                 }}
               >
-                Résultats réels
+                Résultats réels de nos clientes
               </p>
             </AnimateOnScroll>
             <AnimateOnScroll animation="blur-in" delay={0.1}>
               <h2 className="section-title">Avant / Après</h2>
             </AnimateOnScroll>
             <AnimateOnScroll animation="fade-up" delay={0.2}>
-              <p style={{ color: "#888", maxWidth: "500px", margin: "1rem auto 0", lineHeight: 1.7 }}>
-                Des résultats visibles et durables obtenus par nos clientes chez LH Medical Aesthetics.
+              <p style={{ color: "#888", maxWidth: "550px", margin: "1rem auto 0", lineHeight: 1.7 }}>
+                Des transformations visibles et durables obtenues chez LH Medical Aesthetics grâce à la combinaison de nos trois technologies.
               </p>
             </AnimateOnScroll>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
-            {beforeAfter.map((img, i) => (
-              <AnimateOnScroll key={img.src} animation="zoom-in" delay={i * 0.1}>
-                <div
+
+          {/* Bento-style grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(12, 1fr)",
+              gridTemplateRows: "auto",
+              gap: "1rem",
+            }}
+          >
+            {/* Photo 1 — large, spans 7 cols */}
+            <AnimateOnScroll
+              animation="fade-right"
+              style={{ gridColumn: "1 / 8", position: "relative", minHeight: "450px", overflow: "hidden" }}
+            >
+              <Image src={beforeAfter[0].src} alt={beforeAfter[0].alt} fill style={{ objectFit: "cover" }} />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "1.2rem",
+                  left: "1.2rem",
+                  display: "flex",
+                  gap: "0.5rem",
+                }}
+              >
+                <span
                   style={{
-                    position: "relative",
-                    height: "320px",
-                    overflow: "hidden",
-                    background: "#f5f5f5",
+                    background: "#000",
+                    color: "#fff",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
                   }}
                 >
-                  <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      padding: "2rem 1rem 1rem",
-                      background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#fff",
-                        fontSize: "0.7rem",
-                        letterSpacing: "0.15em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {img.alt}
-                    </span>
-                  </div>
-                </div>
-              </AnimateOnScroll>
-            ))}
+                  Avant
+                </span>
+                <span
+                  style={{
+                    background: "#fff",
+                    color: "#000",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Après
+                </span>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: "3rem 1.5rem 1.5rem",
+                  background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#fff",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {beforeAfter[0].zone}
+                </span>
+              </div>
+            </AnimateOnScroll>
+
+            {/* Photo 2 — right, spans 5 cols */}
+            <AnimateOnScroll
+              animation="fade-left"
+              delay={0.15}
+              style={{ gridColumn: "8 / 13", position: "relative", minHeight: "450px", overflow: "hidden" }}
+            >
+              <Image src={beforeAfter[1].src} alt={beforeAfter[1].alt} fill style={{ objectFit: "cover" }} />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "1.2rem",
+                  left: "1.2rem",
+                  display: "flex",
+                  gap: "0.5rem",
+                }}
+              >
+                <span
+                  style={{
+                    background: "#000",
+                    color: "#fff",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Avant
+                </span>
+                <span
+                  style={{
+                    background: "#fff",
+                    color: "#000",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Après
+                </span>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: "3rem 1.5rem 1.5rem",
+                  background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#fff",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {beforeAfter[1].zone}
+                </span>
+              </div>
+            </AnimateOnScroll>
+
+            {/* Photo 3 — bottom left, spans 5 cols */}
+            <AnimateOnScroll
+              animation="fade-right"
+              delay={0.25}
+              style={{ gridColumn: "1 / 6", position: "relative", minHeight: "380px", overflow: "hidden" }}
+            >
+              <Image src={beforeAfter[2].src} alt={beforeAfter[2].alt} fill style={{ objectFit: "cover" }} />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "1.2rem",
+                  left: "1.2rem",
+                  display: "flex",
+                  gap: "0.5rem",
+                }}
+              >
+                <span
+                  style={{
+                    background: "#000",
+                    color: "#fff",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Avant
+                </span>
+                <span
+                  style={{
+                    background: "#fff",
+                    color: "#000",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Après
+                </span>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: "3rem 1.5rem 1.5rem",
+                  background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#fff",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {beforeAfter[2].zone}
+                </span>
+              </div>
+            </AnimateOnScroll>
+
+            {/* Photo 4 — bottom right, spans 7 cols */}
+            <AnimateOnScroll
+              animation="fade-left"
+              delay={0.35}
+              style={{ gridColumn: "6 / 13", position: "relative", minHeight: "380px", overflow: "hidden" }}
+            >
+              <Image src={beforeAfter[3].src} alt={beforeAfter[3].alt} fill style={{ objectFit: "cover" }} />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "1.2rem",
+                  left: "1.2rem",
+                  display: "flex",
+                  gap: "0.5rem",
+                }}
+              >
+                <span
+                  style={{
+                    background: "#000",
+                    color: "#fff",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Avant
+                </span>
+                <span
+                  style={{
+                    background: "#fff",
+                    color: "#000",
+                    padding: "0.35rem 0.9rem",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Après
+                </span>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: "3rem 1.5rem 1.5rem",
+                  background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#fff",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {beforeAfter[3].zone}
+                </span>
+              </div>
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
