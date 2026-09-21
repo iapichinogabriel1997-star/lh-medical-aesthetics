@@ -127,82 +127,63 @@ export default function EpilationLaserPage() {
       </section>
 
       {/* ═══════ DESCRIPTION ═══════ */}
-      <section className="section-padding" style={{ background: "#fff" }}>
+      {/* Mobile */}
+      <section
+        className="md:hidden"
+        style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}
+      >
+        <Image src="/images/laser/2.webp" alt="Épilation laser" fill style={{ objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.8) 55%)" }} />
+        <div style={{ position: "relative", zIndex: 10, padding: "2rem 1.5rem 3rem", color: "#fff" }}>
+          <AnimateOnScroll animation="fade-up">
+            <span style={{ display: "inline-block", padding: "0.35rem 1rem", background: "#fff", color: "#000", fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: "1.2rem" }}>Notre spécialité</span>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="blur-in" delay={0.1}>
+            <h2 style={{ fontSize: "1.8rem", fontWeight: 200, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", lineHeight: 1.3 }}>La Laser-Pro de Divina-Pro</h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="fade-up" delay={0.2}>
+            <p style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: "1.2rem", fontSize: "0.9rem" }}>
+              Dernière génération d&apos;épilation laser avec 4 longueurs d&apos;ondes complémentaires. Tous types de peaux, résultat durable et sans douleur.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0" }}>
+              {["4 longueurs d'ondes", "Tous les phototypes", "Résultats dès les 1ères séances", "Femmes et hommes"].map((item) => (
+                <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "0.6rem" }}>
+                  <svg style={{ width: "16px", height: "16px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#fff" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <span style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.85rem" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/tarifs" className="btn-white">Voir nos tarifs</Link>
+          </AnimateOnScroll>
+        </div>
+      </section>
+      {/* Desktop */}
+      <section className="section-padding hidden md:!block" style={{ background: "#fff" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "4rem",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
             <div>
               <AnimateOnScroll animation="fade-up">
-                <p
-                  style={{
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.3em",
-                    textTransform: "uppercase",
-                    color: "#999",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Notre spécialité
-                </p>
+                <p style={{ fontSize: "0.7rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>Notre spécialité</p>
               </AnimateOnScroll>
               <AnimateOnScroll animation="blur-in" delay={0.1}>
-                <h2
-                  style={{
-                    fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
-                    fontWeight: 200,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    marginBottom: "2rem",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  La Laser-Pro de Divina-Pro
-                </h2>
+                <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.8rem)", fontWeight: 200, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "2rem", lineHeight: 1.3 }}>La Laser-Pro de Divina-Pro</h2>
               </AnimateOnScroll>
               <AnimateOnScroll animation="fade-up" delay={0.2}>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "1.5rem" }}>
-                  Découvrez dans notre institut la <strong>dernière génération d&apos;épilation laser</strong> avec la
-                  technologie Laser-Pro de Divina-Pro. Un appareil professionnel de référence utilisé dans les meilleurs
-                  centres esthétiques.
+                  Découvrez dans notre institut la <strong>dernière génération d&apos;épilation laser</strong> avec la technologie Laser-Pro de Divina-Pro. Un appareil professionnel de référence utilisé dans les meilleurs centres esthétiques.
                 </p>
                 <p style={{ color: "#666", lineHeight: 1.8, marginBottom: "2rem" }}>
-                  Grâce à ses <strong>4 longueurs d&apos;ondes complémentaires</strong>, elle cible efficacement tous
-                  les types de poils et de peaux, y compris les plus claires et les plus foncées, pour un résultat
-                  durable et sans douleur.
+                  Grâce à ses <strong>4 longueurs d&apos;ondes complémentaires</strong>, elle cible efficacement tous les types de poils et de peaux, y compris les plus claires et les plus foncées, pour un résultat durable et sans douleur.
                 </p>
                 <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2.5rem 0" }}>
-                  {[
-                    "4 longueurs d'ondes complémentaires",
-                    "Système de refroidissement intégré",
-                    "Adapté à tous les phototypes",
-                    "Résultats visibles dès les premières séances",
-                    "Pour femmes et hommes",
-                  ].map((item) => (
-                    <li
-                      key={item}
-                      style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}
-                    >
-                      <svg
-                        style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }}
-                        fill="none"
-                        stroke="#000"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                  {["4 longueurs d'ondes complémentaires", "Système de refroidissement intégré", "Adapté à tous les phototypes", "Résultats visibles dès les premières séances", "Pour femmes et hommes"].map((item) => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "0.8rem" }}>
+                      <svg style={{ width: "18px", height: "18px", marginTop: "3px", flexShrink: 0 }} fill="none" stroke="#000" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       <span style={{ color: "#555", fontSize: "0.9rem" }}>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <Link href="/tarifs" className="btn-primary">
-                  Voir nos tarifs
-                </Link>
+                <Link href="/tarifs" className="btn-primary">Voir nos tarifs</Link>
               </AnimateOnScroll>
             </div>
             <AnimateOnScroll animation="fade-left">
