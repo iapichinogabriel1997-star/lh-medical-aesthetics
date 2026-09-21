@@ -7,8 +7,9 @@ import { usePathname } from "next/navigation";
 
 const navLinks = [
   { href: "/", label: "Accueil" },
+  { href: "/epilation-laser", label: "Épilation Laser" },
   { href: "/services", label: "Services" },
-  { href: "/cryolipolyse", label: "Soins corps" },
+  { href: "/cryolipolyse", label: "Amincissement" },
   { href: "/tarifs", label: "Tarifs" },
   { href: "/a-propos", label: "À propos" },
   { href: "/contact", label: "Contact" },
