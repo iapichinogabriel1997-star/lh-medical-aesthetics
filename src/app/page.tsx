@@ -3,6 +3,7 @@ import Link from "next/link";
 import HeroVideo from "@/components/HeroVideo";
 import AnimateOnScroll from "@/components/AnimateOnScroll";
 import AnimatedText from "@/components/AnimatedText";
+import ServicesCarousel from "@/components/ServicesCarousel";
 
 export default function Home() {
   return (
@@ -70,6 +71,9 @@ export default function Home() {
           </AnimateOnScroll>
         </div>
       </section>
+
+      {/* ═══════════ CAROUSEL NOS SOINS ═══════════ */}
+      <ServicesCarousel />
 
       {/* ═══════════ NOUVEAU SOIN — CRYOLIPOLYSE ═══════════ */}
       <section className="section-padding" style={{ background: "#fff" }}>
