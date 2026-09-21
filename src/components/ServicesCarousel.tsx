@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const services = [
   {
@@ -31,162 +31,156 @@ const services = [
   },
 ];
 
-export default function ServicesCarousel() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+/* duplicate the list so the track is wide enough for seamless looping */
+const items = [...services, ...services];
 
-  const goTo = useCallback((index: number) => {
-    setActive(index);
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.children[index] as HTMLElement | undefined;
-    if (!card) return;
-    const scrollLeft = card.offsetLeft - (track.offsetWidth / 2 - card.offsetWidth / 2);
-    track.scrollTo({ left: scrollLeft, behavior: "smooth" });
-  }, []);
-
-  /* autoplay */
-  const resetTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setActive((prev) => {
-        const next = (prev + 1) % services.length;
-        goTo(next);
-        return next;
-      });
-    }, 4000);
-  }, [goTo]);
-
-  useEffect(() => {
-    resetTimer();
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [resetTimer]);
-
-  const handleClick = (i: number) => {
-    goTo(i);
-    resetTimer();
-  };
-
+function Card({ s }: { s: (typeof services)[number] }) {
   return (
-    <section className="section-padding" style={{ background: "#f8f8f8", overflow: "hidden" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-          <p
+    <Link
+      href={s.href}
+      style={{
+        flex: "0 0 300px",
+        textDecoration: "none",
+        color: "inherit",
+        display: "block",
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          height: "400px",
+          overflow: "hidden",
+          borderRadius: "6px",
+        }}
+      >
+        <Image
+          src={s.img}
+          alt={s.title}
+          fill
+          style={{ objectFit: "cover" }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: "1.5rem",
+          }}
+        >
+          <h3
             style={{
-              fontSize: "0.7rem",
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#999",
-              marginBottom: "1rem",
-            }}
-          >
-            Ce que nous proposons
-          </p>
-          <h2
-            style={{
-              fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
-              fontWeight: 200,
+              color: "#fff",
+              fontSize: "1rem",
+              fontWeight: 500,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              lineHeight: 1.3,
+              marginBottom: "0.5rem",
             }}
           >
-            Nos Soins
-          </h2>
+            {s.title}
+          </h3>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "0.8rem",
+              lineHeight: 1.6,
+            }}
+          >
+            {s.desc}
+          </p>
         </div>
+      </div>
+    </Link>
+  );
+}
 
-        {/* Carousel track */}
+export default function ServicesCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+  const rafRef = useRef<number>(0);
+  const posRef = useRef(0);
+  const speed = 0.5; /* px per frame */
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    /* width of the first set (4 cards + gaps) */
+    const cardWidth = 300;
+    const gap = 24; /* 1.5rem ≈ 24px */
+    const setWidth = services.length * (cardWidth + gap);
+
+    const animate = () => {
+      if (!paused) {
+        posRef.current += speed;
+        if (posRef.current >= setWidth) {
+          posRef.current -= setWidth;
+        }
+        track.style.transform = `translateX(-${posRef.current}px)`;
+      }
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [paused]);
+
+  return (
+    <section
+      className="section-padding"
+      style={{ background: "#f8f8f8", overflow: "hidden" }}
+    >
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <p
+          style={{
+            fontSize: "0.7rem",
+            letterSpacing: "0.3em",
+            textTransform: "uppercase",
+            color: "#999",
+            marginBottom: "1rem",
+          }}
+        >
+          Ce que nous proposons
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+            fontWeight: 200,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            lineHeight: 1.3,
+          }}
+        >
+          Nos Soins
+        </h2>
+      </div>
+
+      {/* Track wrapper */}
+      <div
+        style={{ overflow: "hidden", cursor: "grab" }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
         <div
           ref={trackRef}
           style={{
             display: "flex",
             gap: "1.5rem",
-            overflowX: "auto",
-            scrollSnapType: "x mandatory",
-            scrollbarWidth: "none",
-            padding: "0 1rem 1rem",
+            willChange: "transform",
           }}
         >
-          {services.map((s, i) => (
-            <Link
-              key={s.title}
-              href={s.href}
-              onClick={() => handleClick(i)}
-              style={{
-                flex: "0 0 280px",
-                scrollSnapAlign: "center",
-                textDecoration: "none",
-                color: "inherit",
-                transition: "transform 0.4s ease, opacity 0.4s ease",
-                transform: active === i ? "scale(1)" : "scale(0.95)",
-                opacity: active === i ? 1 : 0.6,
-              }}
-            >
-              <div
-                style={{
-                  position: "relative",
-                  height: "360px",
-                  overflow: "hidden",
-                  background: "#e0e0e0",
-                }}
-              >
-                <Image
-                  src={s.img}
-                  alt={s.title}
-                  fill
-                  style={{ objectFit: "cover", transition: "transform 0.6s ease" }}
-                />
-                {/* gradient overlay */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)",
-                  }}
-                />
-                {/* text */}
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "1.5rem" }}>
-                  <h3
-                    style={{
-                      color: "#fff",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    {s.title}
-                  </h3>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.8rem", lineHeight: 1.6 }}>{s.desc}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Dots */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.6rem", marginTop: "2rem" }}>
-          {services.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => handleClick(i)}
-              aria-label={`Aller au soin ${i + 1}`}
-              style={{
-                width: active === i ? "28px" : "8px",
-                height: "8px",
-                borderRadius: "4px",
-                background: active === i ? "#000" : "#ccc",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                padding: 0,
-              }}
-            />
+          {items.map((s, i) => (
+            <Card key={`${s.title}-${i}`} s={s} />
           ))}
         </div>
       </div>
