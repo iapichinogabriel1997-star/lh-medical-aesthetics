@@ -76,12 +76,101 @@ export default function Home() {
       <ServicesCarousel />
 
       {/* ═══════════ NOUVEAU SOIN — CRYOLIPOLYSE ═══════════ */}
-      <section className="section-padding" style={{ background: "#fff" }}>
+      {/* Mobile: card with image background + overlay text */}
+      <section
+        className="md:hidden"
+        style={{
+          position: "relative",
+          minHeight: "85vh",
+          display: "flex",
+          alignItems: "flex-end",
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          src="/images/cryo/3.webp"
+          alt="Cryolipolyse traitement"
+          fill
+          style={{ objectFit: "cover" }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.75) 60%)",
+          }}
+        />
+        <div style={{ position: "relative", zIndex: 10, padding: "2rem 1.5rem 3rem", color: "#fff" }}>
+          <AnimateOnScroll animation="fade-up">
+            <span
+              style={{
+                display: "inline-block",
+                padding: "0.35rem 1rem",
+                background: "#fff",
+                color: "#000",
+                fontSize: "0.6rem",
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                marginBottom: "1.2rem",
+              }}
+            >
+              Nouveau soin
+            </span>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="blur-in" delay={0.1}>
+            <h2
+              style={{
+                fontSize: "1.8rem",
+                fontWeight: 200,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                marginBottom: "1rem",
+                lineHeight: 1.3,
+              }}
+            >
+              Découvrez la Cryolipolyse
+            </h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll animation="fade-up" delay={0.2}>
+            <p style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.7, marginBottom: "1.2rem", fontSize: "0.9rem" }}>
+              Éliminez les graisses tenaces sans chirurgie. Combinée à la radiofréquence et à la lipocavitation pour un remodelage corporel complet.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0" }}>
+              {[
+                "Jusqu'à 30% de réduction par séance",
+                "Résultats définitifs et sans douleur",
+                "3 technologies complémentaires",
+              ].map((item) => (
+                <li
+                  key={item}
+                  style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "0.6rem" }}
+                >
+                  <svg
+                    style={{ width: "16px", height: "16px", marginTop: "3px", flexShrink: 0 }}
+                    fill="none"
+                    stroke="#fff"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.85rem" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/cryolipolyse" className="btn-white">
+              En savoir plus
+            </Link>
+          </AnimateOnScroll>
+        </div>
+      </section>
+
+      {/* Desktop: side-by-side layout */}
+      <section className="section-padding hidden md:!block" style={{ background: "#fff" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+              gridTemplateColumns: "1fr 1fr",
               gap: "4rem",
               alignItems: "center",
             }}
