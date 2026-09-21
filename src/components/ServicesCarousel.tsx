@@ -35,6 +35,8 @@ const services = [
 const items = [...services, ...services];
 
 function Card({ s }: { s: (typeof services)[number] }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <Link
       href={s.href}
@@ -44,6 +46,8 @@ function Card({ s }: { s: (typeof services)[number] }) {
         color: "inherit",
         display: "block",
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <div
         style={{
@@ -57,14 +61,21 @@ function Card({ s }: { s: (typeof services)[number] }) {
           src={s.img}
           alt={s.title}
           fill
-          style={{ objectFit: "cover" }}
+          style={{
+            objectFit: "cover",
+            transition: "transform 0.5s ease, filter 0.5s ease",
+            transform: hovered ? "scale(1.08)" : "scale(1)",
+            filter: hovered ? "brightness(1.15)" : "brightness(1)",
+          }}
         />
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)",
+            background: hovered
+              ? "linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.05) 50%, transparent 100%)"
+              : "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)",
+            transition: "background 0.5s ease",
           }}
         />
         <div
