@@ -114,8 +114,7 @@ export default function Admin() {
   const [calYear, setCalYear] = useState(() => new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [editStart, setEditStart] = useState("10:00");
-  const [editEnd, setEditEnd] = useState("18:00");
+  const [editRanges, setEditRanges] = useState<Array<{ start: string; end: string }>>([{ start: "10:00", end: "18:00" }]);
   const [saving, setSaving] = useState(false);
 
   /* ─── Auth check ─── */
@@ -223,9 +222,11 @@ export default function Admin() {
   }
 
   async function saveDateAvail() {
-    if (!selectedDate || !editStart || !editEnd) return;
+    if (!selectedDate) return;
+    const validRanges = editRanges.filter((r) => r.start && r.end && r.start < r.end);
+    if (validRanges.length === 0) return;
     setSaving(true);
-    // Remove existing entries for this date, then add new one
+    // Remove existing entries for this date, then add all ranges
     await fetch("/api/date-availability", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -234,7 +235,9 @@ export default function Admin() {
     await fetch("/api/date-availability", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date: selectedDate, start_time: editStart, end_time: editEnd }),
+      body: JSON.stringify({
+        entries: validRanges.map((r) => ({ date: selectedDate, start_time: r.start, end_time: r.end })),
+      }),
     });
     await fetchDateAvailability();
     setSaving(false);
@@ -264,11 +267,9 @@ export default function Admin() {
     setSelectedDate(dateStr);
     const existing = dateAvailability.filter((d) => d.date === dateStr);
     if (existing.length > 0) {
-      setEditStart(existing[0].start_time);
-      setEditEnd(existing[existing.length - 1].end_time);
+      setEditRanges(existing.map((e) => ({ start: e.start_time, end: e.end_time })));
     } else {
-      setEditStart("10:00");
-      setEditEnd("18:00");
+      setEditRanges([{ start: "10:00", end: "18:00" }]);
     }
   }
 
@@ -529,7 +530,7 @@ export default function Admin() {
                 </div>
 
                 {/* Day editor panel */}
-                <div style={{ flex: "0 0 280px", minWidth: "260px" }}>
+                <div style={{ flex: "0 0 300px", minWidth: "280px" }}>
                   {selectedDate ? (() => {
                     const hasAvail = !!availByDate[selectedDate];
                     return (
@@ -537,7 +538,7 @@ export default function Admin() {
                         <h3 style={{ fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#999", marginBottom: "0.5rem" }}>
                           Modifier le jour
                         </h3>
-                        <p style={{ fontSize: "1rem", fontWeight: 500, marginBottom: "1.5rem" }}>
+                        <p style={{ fontSize: "1rem", fontWeight: 500, marginBottom: "1rem" }}>
                           {formatDateFR(selectedDate)}
                         </p>
 
@@ -550,17 +551,60 @@ export default function Admin() {
                           color: hasAvail ? "#2e7d32" : "#999",
                           border: `1px solid ${hasAvail ? "#c8e6c9" : "#eee"}`,
                         }}>
-                          {hasAvail ? "Ouvert" : "Fermé"}
+                          {hasAvail ? `Ouvert (${availByDate[selectedDate].length} plage${availByDate[selectedDate].length > 1 ? "s" : ""})` : "Fermé"}
                         </div>
 
-                        <div style={{ marginBottom: "1rem" }}>
-                          <label style={{ display: "block", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", marginBottom: "0.3rem" }}>De</label>
-                          <input type="time" value={editStart} onChange={(e) => setEditStart(e.target.value)} style={{ width: "100%", padding: "0.7rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.9rem", boxSizing: "border-box" }} />
+                        {/* Time ranges */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", marginBottom: "1rem" }}>
+                          {editRanges.map((range, idx) => (
+                            <div key={idx} style={{ padding: "0.8rem", background: "#fafafa", border: "1px solid #f0f0f0" }}>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                                <span style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa" }}>
+                                  Plage {idx + 1}
+                                </span>
+                                {editRanges.length > 1 && (
+                                  <button
+                                    onClick={() => setEditRanges(editRanges.filter((_, i) => i !== idx))}
+                                    style={{ background: "none", border: "none", color: "#e74c3c", cursor: "pointer", fontSize: "0.75rem", fontFamily: "inherit", padding: "0 4px" }}
+                                  >
+                                    Supprimer
+                                  </button>
+                                )}
+                              </div>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <input
+                                  type="time"
+                                  value={range.start}
+                                  onChange={(e) => {
+                                    const next = [...editRanges];
+                                    next[idx] = { ...next[idx], start: e.target.value };
+                                    setEditRanges(next);
+                                  }}
+                                  style={{ flex: 1, padding: "0.5rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.85rem" }}
+                                />
+                                <span style={{ color: "#ccc", fontSize: "0.8rem" }}>—</span>
+                                <input
+                                  type="time"
+                                  value={range.end}
+                                  onChange={(e) => {
+                                    const next = [...editRanges];
+                                    next[idx] = { ...next[idx], end: e.target.value };
+                                    setEditRanges(next);
+                                  }}
+                                  style={{ flex: 1, padding: "0.5rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.85rem" }}
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div style={{ marginBottom: "1.5rem" }}>
-                          <label style={{ display: "block", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", marginBottom: "0.3rem" }}>À</label>
-                          <input type="time" value={editEnd} onChange={(e) => setEditEnd(e.target.value)} style={{ width: "100%", padding: "0.7rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.9rem", boxSizing: "border-box" }} />
-                        </div>
+
+                        {/* Add range button */}
+                        <button
+                          onClick={() => setEditRanges([...editRanges, { start: "14:00", end: "18:00" }])}
+                          style={{ width: "100%", padding: "0.5rem", background: "none", border: "1px dashed #ccc", color: "#888", fontSize: "0.75rem", cursor: "pointer", fontFamily: "inherit", marginBottom: "1.5rem" }}
+                        >
+                          + Ajouter une plage
+                        </button>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                           <button
@@ -568,7 +612,7 @@ export default function Admin() {
                             disabled={saving}
                             style={{ padding: "0.7rem", background: "#000", color: "#fff", border: "none", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: saving ? "wait" : "pointer", fontFamily: "inherit", opacity: saving ? 0.6 : 1 }}
                           >
-                            {saving ? "..." : hasAvail ? "Modifier" : "Ouvrir ce jour"}
+                            {saving ? "..." : hasAvail ? "Enregistrer" : "Ouvrir ce jour"}
                           </button>
                           {hasAvail && (
                             <button
