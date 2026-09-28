@@ -39,8 +39,50 @@ interface AvailRow {
   end_time: string;
 }
 
+interface DateAvailRow {
+  id: number;
+  date: string;
+  start_time: string;
+  end_time: string;
+}
+
 const joursFR = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+const joursCourtsFR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const moisFR = ["jan.", "fév.", "mars", "avr.", "mai", "juin", "juil.", "août", "sep.", "oct.", "nov.", "déc."];
+const moisCompletsFR = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
+function getCalendarDays(year: number, month: number): Array<{ date: string; day: number; currentMonth: boolean }> {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  // Monday = 0, Sunday = 6 (European week)
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+
+  const days: Array<{ date: string; day: number; currentMonth: boolean }> = [];
+
+  // Previous month padding
+  for (let i = startDow - 1; i >= 0; i--) {
+    const d = new Date(year, month, -i);
+    days.push({ date: d.toISOString().split("T")[0], day: d.getDate(), currentMonth: false });
+  }
+
+  // Current month
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dt = new Date(year, month, d);
+    days.push({ date: dt.toISOString().split("T")[0], day: d, currentMonth: true });
+  }
+
+  // Next month padding (fill to complete last week)
+  const remaining = 7 - (days.length % 7);
+  if (remaining < 7) {
+    for (let i = 1; i <= remaining; i++) {
+      const d = new Date(year, month + 1, i);
+      days.push({ date: d.toISOString().split("T")[0], day: d.getDate(), currentMonth: false });
+    }
+  }
+
+  return days;
+}
 
 /* ────────────────────────────────────────────
    COMPONENT
@@ -53,10 +95,11 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [tab, setTab] = useState<"bookings" | "blocked" | "hours">("bookings");
+  const [tab, setTab] = useState<"bookings" | "blocked" | "hours" | "planning">("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blocked, setBlocked] = useState<BlockedSlot[]>([]);
   const [availability, setAvailability] = useState<AvailRow[]>([]);
+  const [dateAvailability, setDateAvailability] = useState<DateAvailRow[]>([]);
 
   // Block form
   const [blockDate, setBlockDate] = useState("");
@@ -66,6 +109,14 @@ export default function Admin() {
 
   // Hours edit
   const [editHours, setEditHours] = useState<Array<{ day: number; start: string; end: string; open: boolean }>>([]);
+
+  // Calendar planning
+  const [calYear, setCalYear] = useState(() => new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [editStart, setEditStart] = useState("10:00");
+  const [editEnd, setEditEnd] = useState("18:00");
+  const [saving, setSaving] = useState(false);
 
   /* ─── Auth check ─── */
   useEffect(() => {
@@ -87,6 +138,14 @@ export default function Admin() {
     if (res.ok) setBlocked(await res.json());
   }, []);
 
+  const fetchDateAvailability = useCallback(async (year?: number, month?: number) => {
+    const y = year ?? calYear;
+    const m = month ?? calMonth;
+    const monthStr = `${y}-${String(m + 1).padStart(2, "0")}`;
+    const res = await fetch(`/api/date-availability?month=${monthStr}`);
+    if (res.ok) setDateAvailability(await res.json());
+  }, [calYear, calMonth]);
+
   const fetchAvailability = useCallback(async () => {
     const res = await fetch("/api/availability");
     if (res.ok) {
@@ -106,8 +165,9 @@ export default function Admin() {
       fetchBookings();
       fetchBlocked();
       fetchAvailability();
+      fetchDateAvailability();
     }
-  }, [authenticated, fetchBookings, fetchBlocked, fetchAvailability]);
+  }, [authenticated, fetchBookings, fetchBlocked, fetchAvailability, fetchDateAvailability]);
 
   /* ─── Login ─── */
   async function handleLogin(e: React.FormEvent) {
@@ -160,6 +220,56 @@ export default function Admin() {
       body: JSON.stringify({ id }),
     });
     fetchBlocked();
+  }
+
+  async function saveDateAvail() {
+    if (!selectedDate || !editStart || !editEnd) return;
+    setSaving(true);
+    // Remove existing entries for this date, then add new one
+    await fetch("/api/date-availability", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: selectedDate }),
+    });
+    await fetch("/api/date-availability", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: selectedDate, start_time: editStart, end_time: editEnd }),
+    });
+    await fetchDateAvailability();
+    setSaving(false);
+  }
+
+  async function removeDateAvail(date: string) {
+    await fetch("/api/date-availability", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date }),
+    });
+    await fetchDateAvailability();
+  }
+
+  function navigateMonth(dir: number) {
+    let newMonth = calMonth + dir;
+    let newYear = calYear;
+    if (newMonth > 11) { newMonth = 0; newYear++; }
+    if (newMonth < 0) { newMonth = 11; newYear--; }
+    setCalMonth(newMonth);
+    setCalYear(newYear);
+    setSelectedDate(null);
+    fetchDateAvailability(newYear, newMonth);
+  }
+
+  function selectCalendarDay(dateStr: string) {
+    setSelectedDate(dateStr);
+    const existing = dateAvailability.filter((d) => d.date === dateStr);
+    if (existing.length > 0) {
+      setEditStart(existing[0].start_time);
+      setEditEnd(existing[existing.length - 1].end_time);
+    } else {
+      setEditStart("10:00");
+      setEditEnd("18:00");
+    }
   }
 
   async function saveHours() {
@@ -261,6 +371,7 @@ export default function Admin() {
       {/* Tabs */}
       <div style={{ padding: "1.5rem 2rem", display: "flex", gap: "0.5rem", maxWidth: "1100px", margin: "0 auto", flexWrap: "wrap" }}>
         <button onClick={() => setTab("bookings")} style={tabStyle(tab === "bookings")}>Réservations</button>
+        <button onClick={() => setTab("planning")} style={tabStyle(tab === "planning")}>Planning</button>
         <button onClick={() => setTab("blocked")} style={tabStyle(tab === "blocked")}>Blocages</button>
         <button onClick={() => setTab("hours")} style={tabStyle(tab === "hours")}>Horaires</button>
       </div>
@@ -311,6 +422,180 @@ export default function Admin() {
             )}
           </div>
         )}
+
+        {/* ═══════ TAB: Planning (Calendrier) ═══════ */}
+        {tab === "planning" && (() => {
+          const calDays = getCalendarDays(calYear, calMonth);
+          const availByDate: Record<string, DateAvailRow[]> = {};
+          dateAvailability.forEach((d) => {
+            if (!availByDate[d.date]) availByDate[d.date] = [];
+            availByDate[d.date].push(d);
+          });
+          const today = new Date().toISOString().split("T")[0];
+
+          return (
+            <div>
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 300, letterSpacing: "0.1em", marginBottom: "0.5rem" }}>
+                Planning
+              </h2>
+              <p style={{ color: "#888", fontSize: "0.9rem", marginBottom: "2rem" }}>
+                Cliquez sur un jour pour définir les horaires. Les jours verts sont ouverts, les gris sont fermés.
+              </p>
+
+              {/* Month navigation */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", background: "#fff", border: "1px solid #eee", padding: "1rem 1.5rem" }}>
+                <button
+                  onClick={() => navigateMonth(-1)}
+                  style={{ background: "none", border: "1px solid #ddd", padding: "0.5rem 1rem", cursor: "pointer", fontFamily: "inherit", fontSize: "1rem", color: "#666" }}
+                >
+                  &larr;
+                </button>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 400, letterSpacing: "0.05em", margin: 0 }}>
+                  {moisCompletsFR[calMonth]} {calYear}
+                </h3>
+                <button
+                  onClick={() => navigateMonth(1)}
+                  style={{ background: "none", border: "1px solid #ddd", padding: "0.5rem 1rem", cursor: "pointer", fontFamily: "inherit", fontSize: "1rem", color: "#666" }}
+                >
+                  &rarr;
+                </button>
+              </div>
+
+              <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+                {/* Calendar grid */}
+                <div style={{ flex: "1 1 600px", background: "#fff", border: "1px solid #eee", padding: "1.5rem" }}>
+                  {/* Day headers */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "2px", marginBottom: "2px" }}>
+                    {joursCourtsFR.map((j) => (
+                      <div key={j} style={{ textAlign: "center", padding: "0.5rem", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#999", fontWeight: 500 }}>
+                        {j}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Day cells */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "2px" }}>
+                    {calDays.map((day) => {
+                      const hasAvail = !!availByDate[day.date];
+                      const isSelected = selectedDate === day.date;
+                      const isToday = day.date === today;
+                      const entries = availByDate[day.date] || [];
+
+                      return (
+                        <button
+                          key={day.date}
+                          onClick={() => day.currentMonth && selectCalendarDay(day.date)}
+                          style={{
+                            padding: "0.6rem 0.4rem",
+                            minHeight: "70px",
+                            border: isSelected ? "2px solid #000" : "1px solid #f0f0f0",
+                            background: !day.currentMonth ? "#fafafa" : hasAvail ? "#e8f5e9" : "#fff",
+                            cursor: day.currentMonth ? "pointer" : "default",
+                            fontFamily: "inherit",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "4px",
+                            opacity: day.currentMonth ? 1 : 0.35,
+                            position: "relative",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          <span style={{
+                            fontSize: "0.9rem",
+                            fontWeight: isToday ? 700 : hasAvail ? 500 : 400,
+                            color: hasAvail ? "#2e7d32" : day.currentMonth ? "#666" : "#ccc",
+                            width: "28px",
+                            height: "28px",
+                            lineHeight: "28px",
+                            borderRadius: "50%",
+                            background: isToday ? "#000" : "transparent",
+                            ...(isToday ? { color: "#fff" } : {}),
+                          }}>
+                            {day.day}
+                          </span>
+                          {hasAvail && entries.map((e, i) => (
+                            <span key={i} style={{ fontSize: "0.6rem", color: "#2e7d32", lineHeight: 1.2 }}>
+                              {e.start_time}-{e.end_time}
+                            </span>
+                          ))}
+                          {day.currentMonth && !hasAvail && (
+                            <span style={{ fontSize: "0.6rem", color: "#ccc" }}>Fermé</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Day editor panel */}
+                <div style={{ flex: "0 0 280px", minWidth: "260px" }}>
+                  {selectedDate ? (() => {
+                    const hasAvail = !!availByDate[selectedDate];
+                    return (
+                      <div style={{ background: "#fff", border: "1px solid #eee", padding: "1.5rem", position: "sticky", top: "100px" }}>
+                        <h3 style={{ fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#999", marginBottom: "0.5rem" }}>
+                          Modifier le jour
+                        </h3>
+                        <p style={{ fontSize: "1rem", fontWeight: 500, marginBottom: "1.5rem" }}>
+                          {formatDateFR(selectedDate)}
+                        </p>
+
+                        <div style={{
+                          padding: "0.6rem",
+                          marginBottom: "1.5rem",
+                          fontSize: "0.8rem",
+                          textAlign: "center",
+                          background: hasAvail ? "#e8f5e9" : "#f5f5f5",
+                          color: hasAvail ? "#2e7d32" : "#999",
+                          border: `1px solid ${hasAvail ? "#c8e6c9" : "#eee"}`,
+                        }}>
+                          {hasAvail ? "Ouvert" : "Fermé"}
+                        </div>
+
+                        <div style={{ marginBottom: "1rem" }}>
+                          <label style={{ display: "block", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", marginBottom: "0.3rem" }}>De</label>
+                          <input type="time" value={editStart} onChange={(e) => setEditStart(e.target.value)} style={{ width: "100%", padding: "0.7rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.9rem", boxSizing: "border-box" }} />
+                        </div>
+                        <div style={{ marginBottom: "1.5rem" }}>
+                          <label style={{ display: "block", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", marginBottom: "0.3rem" }}>À</label>
+                          <input type="time" value={editEnd} onChange={(e) => setEditEnd(e.target.value)} style={{ width: "100%", padding: "0.7rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.9rem", boxSizing: "border-box" }} />
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                          <button
+                            onClick={saveDateAvail}
+                            disabled={saving}
+                            style={{ padding: "0.7rem", background: "#000", color: "#fff", border: "none", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: saving ? "wait" : "pointer", fontFamily: "inherit", opacity: saving ? 0.6 : 1 }}
+                          >
+                            {saving ? "..." : hasAvail ? "Modifier" : "Ouvrir ce jour"}
+                          </button>
+                          {hasAvail && (
+                            <button
+                              onClick={() => removeDateAvail(selectedDate)}
+                              style={{ padding: "0.7rem", background: "#fff", color: "#e74c3c", border: "1px solid #e74c3c", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit" }}
+                            >
+                              Fermer ce jour
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })() : (
+                    <div style={{ background: "#fff", border: "1px solid #eee", padding: "2rem", textAlign: "center", color: "#999" }}>
+                      <p style={{ fontSize: "0.85rem" }}>Sélectionnez un jour dans le calendrier pour modifier ses horaires.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Info notice */}
+              <div style={{ marginTop: "1.5rem", padding: "1rem 1.5rem", background: "#fffde7", border: "1px solid #fff9c4", fontSize: "0.85rem", color: "#666" }}>
+                Si un mois contient au moins une date planifiée, les horaires hebdomadaires ne s&apos;appliqueront pas pour ce mois — seuls les jours définis ici seront ouverts.
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ═══════ TAB: Blocages ═══════ */}
         {tab === "blocked" && (

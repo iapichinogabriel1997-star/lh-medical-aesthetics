@@ -28,16 +28,40 @@ export async function GET(req: NextRequest) {
 
   if (!date) return NextResponse.json({ error: "Date requise" }, { status: 400 });
 
-  const d = new Date(date + "T00:00:00");
-  const dow = d.getDay();
+  // Check if date-specific availability exists for this month
+  const monthPrefix = date.substring(0, 7); // "YYYY-MM"
+  const hasDateAvail = await db.execute({
+    sql: "SELECT COUNT(*) as count FROM date_availability WHERE date LIKE ?",
+    args: [monthPrefix + "%"],
+  });
 
-  const availResult = await db.execute({ sql: "SELECT * FROM availability WHERE day_of_week = ?", args: [dow] });
-  const avail = availResult.rows[0];
+  let openMin: number;
+  let closeMin: number;
+  let dateRanges: Array<{ start: number; end: number }> = [];
 
-  if (!avail) return NextResponse.json([]);
-
-  const openMin = timeToMinutes(avail.start_time as string);
-  const closeMin = timeToMinutes(avail.end_time as string);
+  if (Number(hasDateAvail.rows[0].count) > 0) {
+    // Date-specific mode: only listed dates are open
+    const dateAvailResult = await db.execute({
+      sql: "SELECT * FROM date_availability WHERE date = ? ORDER BY start_time",
+      args: [date],
+    });
+    if (dateAvailResult.rows.length === 0) return NextResponse.json([]);
+    dateRanges = dateAvailResult.rows.map((r) => ({
+      start: timeToMinutes(r.start_time as string),
+      end: timeToMinutes(r.end_time as string),
+    }));
+    openMin = dateRanges[0].start;
+    closeMin = dateRanges[dateRanges.length - 1].end;
+  } else {
+    // Fallback to weekly recurring availability
+    const d = new Date(date + "T00:00:00");
+    const dow = d.getDay();
+    const availResult = await db.execute({ sql: "SELECT * FROM availability WHERE day_of_week = ?", args: [dow] });
+    const avail = availResult.rows[0];
+    if (!avail) return NextResponse.json([]);
+    openMin = timeToMinutes(avail.start_time as string);
+    closeMin = timeToMinutes(avail.end_time as string);
+  }
 
   const bookingsResult = await db.execute({ sql: "SELECT time, end_time FROM bookings WHERE date = ? AND status = 'confirmed'", args: [date] });
   const bookings = bookingsResult.rows;
@@ -49,6 +73,12 @@ export async function GET(req: NextRequest) {
   for (let m = openMin; m + duration <= closeMin; m += 15) {
     const slotStart = m;
     const slotEnd = m + duration;
+
+    // If multiple date ranges, check slot fits entirely within one range
+    if (dateRanges.length > 0) {
+      const fitsInRange = dateRanges.some((r) => slotStart >= r.start && slotEnd <= r.end);
+      if (!fitsInRange) continue;
+    }
 
     const conflictBooking = bookings.some((b) => {
       const bStart = timeToMinutes(b.time as string);

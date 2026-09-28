@@ -55,6 +55,13 @@ async function initDb() {
     reason TEXT DEFAULT ''
   )`);
 
+  await db.execute(`CREATE TABLE IF NOT EXISTS date_availability (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL
+  )`);
+
   // Seed admin
   const adminCheck = await db.execute("SELECT COUNT(*) as count FROM admin");
   if (Number(adminCheck.rows[0].count) === 0) {
