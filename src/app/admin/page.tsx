@@ -89,6 +89,14 @@ function getCalendarDays(year: number, month: number): Array<{ date: string; day
    ──────────────────────────────────────────── */
 
 export default function Admin() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const [authenticated, setAuthenticated] = useState(false);
   const [checking, setChecking] = useState(true);
   const [username, setUsername] = useState("");
@@ -295,8 +303,8 @@ export default function Admin() {
 
   /* ─── Styles ─── */
   const tabStyle = (active: boolean): React.CSSProperties => ({
-    padding: "0.8rem 1.5rem",
-    fontSize: "0.75rem",
+    padding: isMobile ? "0.6rem 0" : "0.8rem 1.5rem",
+    fontSize: isMobile ? "0.65rem" : "0.75rem",
     letterSpacing: "0.15em",
     textTransform: "uppercase",
     background: active ? "#000" : "transparent",
@@ -305,6 +313,7 @@ export default function Admin() {
     cursor: "pointer",
     fontFamily: "inherit",
     transition: "all 0.2s ease",
+    ...(isMobile ? { flex: "1 1 45%", textAlign: "center" as const } : {}),
   });
 
   /* ═══════════════════════════════════════════
@@ -357,7 +366,7 @@ export default function Admin() {
   return (
     <div style={{ minHeight: "100vh", background: "#f8f8f8" }}>
       {/* Admin header */}
-      <div style={{ background: "#000", color: "#fff", padding: "5.5rem 2rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "100%" }}>
+      <div style={{ background: "#000", color: "#fff", padding: isMobile ? "5rem 1rem 1rem" : "5.5rem 2rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <Image src="/images/logo.svg" alt="LH" width={28} height={28} style={{ filter: "invert(1)" }} />
           <span style={{ fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 300 }}>
@@ -370,14 +379,14 @@ export default function Admin() {
       </div>
 
       {/* Tabs */}
-      <div style={{ padding: "1.5rem 2rem", display: "flex", gap: "0.5rem", maxWidth: "1100px", margin: "0 auto", flexWrap: "wrap" }}>
+      <div style={{ padding: isMobile ? "1rem" : "1.5rem 2rem", display: "flex", gap: isMobile ? "0.4rem" : "0.5rem", maxWidth: "1100px", margin: "0 auto", flexWrap: "wrap" }}>
         <button onClick={() => setTab("bookings")} style={tabStyle(tab === "bookings")}>Réservations</button>
         <button onClick={() => setTab("planning")} style={tabStyle(tab === "planning")}>Planning</button>
         <button onClick={() => setTab("blocked")} style={tabStyle(tab === "blocked")}>Blocages</button>
         <button onClick={() => setTab("hours")} style={tabStyle(tab === "hours")}>Horaires</button>
       </div>
 
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 2rem 4rem" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: isMobile ? "0 0.8rem 3rem" : "0 2rem 4rem", overflow: "hidden", boxSizing: "border-box" }}>
 
         {/* ═══════ TAB: Réservations ═══════ */}
         {tab === "bookings" && (
@@ -392,8 +401,8 @@ export default function Admin() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
                 {bookings.filter((b) => b.status === "confirmed").map((b) => (
-                  <div key={b.id} style={{ background: "#fff", border: "1px solid #eee", padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
-                    <div style={{ flex: 1, minWidth: "200px" }}>
+                  <div key={b.id} style={{ background: "#fff", border: "1px solid #eee", padding: isMobile ? "1rem" : "1.5rem", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "flex-start", flexWrap: "wrap", gap: "1rem" }}>
+                    <div style={{ flex: 1, minWidth: isMobile ? "0" : "200px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.5rem" }}>
                         <span style={{ fontSize: "1rem", fontWeight: 500 }}>{b.first_name} {b.last_name}</span>
                         <span style={{ fontSize: "0.7rem", padding: "0.2rem 0.6rem", background: "#e8f5e9", color: "#2e7d32", letterSpacing: "0.1em", textTransform: "uppercase" }}>
@@ -444,7 +453,7 @@ export default function Admin() {
               </p>
 
               {/* Month navigation */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", background: "#fff", border: "1px solid #eee", padding: "1rem 1.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", background: "#fff", border: "1px solid #eee", padding: isMobile ? "0.8rem" : "1rem 1.5rem" }}>
                 <button
                   onClick={() => navigateMonth(-1)}
                   style={{ background: "none", border: "1px solid #ddd", padding: "0.5rem 1rem", cursor: "pointer", fontFamily: "inherit", fontSize: "1rem", color: "#666" }}
@@ -462,20 +471,20 @@ export default function Admin() {
                 </button>
               </div>
 
-              <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "1.5rem", flexWrap: "wrap" }}>
                 {/* Calendar grid */}
-                <div style={{ flex: "1 1 600px", background: "#fff", border: "1px solid #eee", padding: "1.5rem" }}>
+                <div style={{ flex: "1 1 auto", width: "100%", background: "#fff", border: "1px solid #eee", padding: isMobile ? "0.5rem" : "1.5rem", overflow: "hidden", minWidth: 0, boxSizing: "border-box" }}>
                   {/* Day headers */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "2px", marginBottom: "2px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "2px", marginBottom: "2px" }}>
                     {joursCourtsFR.map((j) => (
-                      <div key={j} style={{ textAlign: "center", padding: "0.5rem", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#999", fontWeight: 500 }}>
+                      <div key={j} style={{ textAlign: "center", padding: "0.5rem", fontSize: isMobile ? "0.6rem" : "0.7rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", fontWeight: 500, overflow: "hidden" }}>
                         {j}
                       </div>
                     ))}
                   </div>
 
                   {/* Day cells */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "2px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "2px" }}>
                     {calDays.map((day) => {
                       const hasAvail = !!availByDate[day.date];
                       const isSelected = selectedDate === day.date;
@@ -487,8 +496,8 @@ export default function Admin() {
                           key={day.date}
                           onClick={() => day.currentMonth && selectCalendarDay(day.date)}
                           style={{
-                            padding: "0.6rem 0.4rem",
-                            minHeight: "70px",
+                            padding: isMobile ? "0.3rem 0.15rem" : "0.4rem 0.2rem",
+                            minHeight: isMobile ? "44px" : "70px",
                             border: isSelected ? "2px solid #000" : "1px solid #f0f0f0",
                             background: !day.currentMonth ? "#fafafa" : hasAvail ? "#e8f5e9" : "#fff",
                             cursor: day.currentMonth ? "pointer" : "default",
@@ -496,32 +505,29 @@ export default function Admin() {
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: "4px",
+                            gap: isMobile ? "2px" : "2px",
                             opacity: day.currentMonth ? 1 : 0.35,
                             position: "relative",
                             transition: "all 0.15s ease",
+                            overflow: "hidden",
+                            minWidth: 0,
                           }}
                         >
                           <span style={{
-                            fontSize: "0.9rem",
+                            fontSize: isMobile ? "0.75rem" : "0.9rem",
                             fontWeight: isToday ? 700 : hasAvail ? 500 : 400,
                             color: hasAvail ? "#2e7d32" : day.currentMonth ? "#666" : "#ccc",
-                            width: "28px",
-                            height: "28px",
-                            lineHeight: "28px",
+                            width: isMobile ? "24px" : "28px",
+                            height: isMobile ? "24px" : "28px",
+                            lineHeight: isMobile ? "24px" : "28px",
                             borderRadius: "50%",
                             background: isToday ? "#000" : "transparent",
                             ...(isToday ? { color: "#fff" } : {}),
                           }}>
                             {day.day}
                           </span>
-                          {hasAvail && entries.map((e, i) => (
-                            <span key={i} style={{ fontSize: "0.6rem", color: "#2e7d32", lineHeight: 1.2 }}>
-                              {e.start_time}-{e.end_time}
-                            </span>
-                          ))}
-                          {day.currentMonth && !hasAvail && (
-                            <span style={{ fontSize: "0.6rem", color: "#ccc" }}>Fermé</span>
+                          {hasAvail && (
+                            <span style={{ width: isMobile ? "6px" : "8px", height: isMobile ? "6px" : "8px", borderRadius: "50%", background: "#2e7d32" }} />
                           )}
                         </button>
                       );
@@ -530,7 +536,7 @@ export default function Admin() {
                 </div>
 
                 {/* Day editor panel */}
-                <div style={{ flex: "0 0 300px", minWidth: "280px" }}>
+                <div style={{ flex: isMobile ? "1 1 100%" : "0 0 300px", minWidth: isMobile ? "0" : "280px" }}>
                   {selectedDate ? (() => {
                     const hasAvail = !!availByDate[selectedDate];
                     return (
@@ -652,11 +658,11 @@ export default function Admin() {
             </p>
 
             {/* Add block form */}
-            <div style={{ background: "#fff", border: "1px solid #eee", padding: "1.5rem", marginBottom: "2rem" }}>
+            <div style={{ background: "#fff", border: "1px solid #eee", padding: isMobile ? "1rem" : "1.5rem", marginBottom: "2rem" }}>
               <h3 style={{ fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#999", marginBottom: "1rem" }}>
                 Nouveau blocage
               </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", marginBottom: "0.3rem" }}>Date</label>
                   <input type="date" value={blockDate} onChange={(e) => setBlockDate(e.target.value)} style={{ width: "100%", padding: "0.7rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.9rem" }} />
@@ -676,7 +682,7 @@ export default function Admin() {
               </div>
               <button
                 onClick={addBlock}
-                style={{ padding: "0.7rem 2rem", background: "#000", color: "#fff", border: "none", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit" }}
+                style={{ padding: "0.7rem 2rem", background: "#000", color: "#fff", border: "none", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit", ...(isMobile ? { width: "100%" } : {}) }}
               >
                 Bloquer ce créneau
               </button>
@@ -693,11 +699,11 @@ export default function Admin() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {blocked.map((b) => (
-                  <div key={b.id} style={{ background: "#fff", border: "1px solid #eee", padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div key={b.id} style={{ background: "#fff", border: "1px solid #eee", padding: isMobile ? "0.8rem" : "1rem 1.5rem", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: isMobile ? "0.6rem" : "0" }}>
                     <div>
-                      <span style={{ fontWeight: 500 }}>{formatDateFR(b.date)}</span>
-                      <span style={{ color: "#888", marginLeft: "1rem" }}>{b.start_time} - {b.end_time}</span>
-                      {b.reason && <span style={{ color: "#aaa", marginLeft: "1rem", fontStyle: "italic" }}>{b.reason}</span>}
+                      <span style={{ fontWeight: 500, fontSize: isMobile ? "0.85rem" : "inherit" }}>{formatDateFR(b.date)}</span>
+                      <span style={{ color: "#888", marginLeft: isMobile ? "0.5rem" : "1rem", fontSize: isMobile ? "0.8rem" : "inherit" }}>{b.start_time} - {b.end_time}</span>
+                      {b.reason && <span style={{ color: "#aaa", marginLeft: isMobile ? "0" : "1rem", fontStyle: "italic", fontSize: isMobile ? "0.8rem" : "inherit", ...(isMobile ? { display: "block", marginTop: "0.2rem" } : {}) }}>{b.reason}</span>}
                     </div>
                     <button
                       onClick={() => removeBlock(b.id)}
@@ -722,13 +728,14 @@ export default function Admin() {
               Définissez les jours et heures où les clients peuvent réserver.
             </p>
 
-            <div style={{ background: "#fff", border: "1px solid #eee", padding: "1.5rem" }}>
+            <div style={{ background: "#fff", border: "1px solid #eee", padding: isMobile ? "1rem" : "1.5rem" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
                 {editHours.map((h, idx) => (
-                  <div key={h.day} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.8rem 0", borderBottom: idx < 6 ? "1px solid #f0f0f0" : "none", flexWrap: "wrap" }}>
-                    <label style={{ width: "100px", fontSize: "0.9rem", fontWeight: h.open ? 500 : 400, color: h.open ? "#000" : "#ccc" }}>
-                      {joursFR[h.day]}
-                    </label>
+                  <div key={h.day} style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? "0.6rem" : "1rem", padding: "0.8rem 0", borderBottom: idx < 6 ? "1px solid #f0f0f0" : "none", flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "space-between" : "flex-start" }}>
+                      <label style={{ width: isMobile ? "auto" : "100px", fontSize: "0.9rem", fontWeight: h.open ? 500 : 400, color: h.open ? "#000" : "#ccc" }}>
+                        {joursFR[h.day]}
+                      </label>
                     <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
                       <input
                         type="checkbox"
@@ -742,8 +749,9 @@ export default function Admin() {
                       />
                       <span style={{ fontSize: "0.8rem", color: "#888" }}>{h.open ? "Ouvert" : "Fermé"}</span>
                     </label>
+                    </div>
                     {h.open && (
-                      <>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", ...(isMobile ? { width: "100%" } : {}) }}>
                         <input
                           type="time"
                           value={h.start}
@@ -752,7 +760,7 @@ export default function Admin() {
                             next[idx] = { ...next[idx], start: e.target.value };
                             setEditHours(next);
                           }}
-                          style={{ padding: "0.5rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.85rem" }}
+                          style={{ padding: "0.5rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.85rem", ...(isMobile ? { flex: 1 } : {}) }}
                         />
                         <span style={{ color: "#ccc" }}>—</span>
                         <input
@@ -763,9 +771,9 @@ export default function Admin() {
                             next[idx] = { ...next[idx], end: e.target.value };
                             setEditHours(next);
                           }}
-                          style={{ padding: "0.5rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.85rem" }}
+                          style={{ padding: "0.5rem", border: "1px solid #ddd", fontFamily: "inherit", fontSize: "0.85rem", ...(isMobile ? { flex: 1 } : {}) }}
                         />
-                      </>
+                      </div>
                     )}
                   </div>
                 ))}
