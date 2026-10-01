@@ -19,74 +19,7 @@ interface Category {
   services: Service[];
 }
 
-const categories: Category[] = [
-  {
-    name: "Zones individuelles",
-    services: [
-      { name: "Aisselles", price: 40, duration: 15 },
-      { name: "Pieds", price: 20, duration: 10 },
-      { name: "Mains (Doigts)", price: 20, duration: 10 },
-      { name: "Sillon inter-fessier", price: 35, duration: 15 },
-      { name: "Maillot simple échancré", price: 35, duration: 20 },
-      { name: "Maillot intégral", price: 50, duration: 25 },
-      { name: "Cuisses", price: 45, duration: 25 },
-      { name: "Demi-jambes / Genoux", price: 50, duration: 25 },
-      { name: "Jambes complètes", price: 70, duration: 40 },
-      { name: "Demi-bras", price: 35, duration: 15 },
-      { name: "Bras complet (sans aisselles)", price: 50, duration: 25 },
-      { name: "Dos", price: 90, duration: 40 },
-      { name: "Ligne abdominale", price: 20, duration: 10 },
-    ],
-  },
-  {
-    name: "Visage & Nuque",
-    services: [
-      { name: "Nuque", price: 35, duration: 15 },
-      { name: "Lèvre supérieure", price: 25, duration: 10 },
-      { name: "Barbe", price: 50, duration: 25 },
-      { name: "Duvet", price: 30, duration: 15 },
-    ],
-  },
-  {
-    name: "Forfaits Laser",
-    services: [
-      { name: "Forfait 1 — Bikini, Sif, Aisselles", price: 90, duration: 45 },
-      { name: "Forfait 2 — Bikini, Sif, Aisselles, Demi-jambes", price: 130, duration: 60 },
-      { name: "Forfait 3 — Bikini, Sif, Ligne abdo, Aisselles, Jambes", price: 150, duration: 75 },
-      { name: "Forfait 4 — Tout le corps", price: 180, duration: 90 },
-    ],
-  },
-  {
-    name: "Cryolipolyse",
-    services: [
-      { name: "Cryolipolyse — 1 zone", price: 150, duration: 60 },
-      { name: "Cryolipolyse — 2 zones", price: 250, duration: 90 },
-      { name: "Cryolipolyse — 3 zones", price: 350, duration: 120 },
-    ],
-  },
-  {
-    name: "Radiofréquence",
-    services: [
-      { name: "Radiofréquence — Visage", price: 80, duration: 30 },
-      { name: "Radiofréquence — Corps (1 zone)", price: 90, duration: 40 },
-      { name: "Radiofréquence — Corps (2 zones)", price: 150, duration: 60 },
-    ],
-  },
-  {
-    name: "Lipocavitation",
-    services: [
-      { name: "Lipocavitation — 1 zone", price: 80, duration: 30 },
-      { name: "Lipocavitation — 2 zones", price: 140, duration: 50 },
-    ],
-  },
-  {
-    name: "Forfaits Cryo / RF / Lipo",
-    services: [
-      { name: "Forfait Cryo + RF (1 zone)", price: 200, duration: 90 },
-      { name: "Forfait Cryo + RF + Lipo (1 zone)", price: 250, duration: 120 },
-    ],
-  },
-];
+const categoryOrder = ["Zones individuelles", "Visage & Nuque", "Forfaits Laser", "Cryolipolyse", "Radiofréquence", "Lipocavitation", "Forfaits combinés"];
 
 const moisFR = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -100,9 +33,32 @@ const moisFR = [
 export default function Reservation() {
   const [step, setStep] = useState(1);
 
+  // Services from DB
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/services")
+      .then((r) => r.json())
+      .then((rows: Array<{ category: string; name: string; price: number; duration: number }>) => {
+        const grouped: Record<string, Service[]> = {};
+        rows.forEach((r) => {
+          if (!grouped[r.category]) grouped[r.category] = [];
+          grouped[r.category].push({ name: r.name, price: Number(r.price), duration: Number(r.duration) });
+        });
+        const cats: Category[] = categoryOrder
+          .filter((c) => grouped[c])
+          .map((c) => ({ name: c, services: grouped[c] }));
+        setCategories(cats);
+        if (cats.length > 0) setOpenCategory(cats[0].name);
+        setLoadingServices(false);
+      })
+      .catch(() => setLoadingServices(false));
+  }, []);
+
   // Step 1
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
-  const [openCategory, setOpenCategory] = useState<string>(categories[0].name);
+  const [openCategory, setOpenCategory] = useState<string>("");
 
   // Step 2
   const [currentMonth, setCurrentMonth] = useState(() => {

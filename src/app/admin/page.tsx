@@ -46,6 +46,17 @@ interface DateAvailRow {
   end_time: string;
 }
 
+interface ServiceRow {
+  id: number;
+  category: string;
+  name: string;
+  price: number;
+  duration: number;
+  detail: string;
+  featured: number;
+  display_order: number;
+}
+
 const joursFR = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 const joursCourtsFR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const moisFR = ["jan.", "fév.", "mars", "avr.", "mai", "juin", "juil.", "août", "sep.", "oct.", "nov.", "déc."];
@@ -103,11 +114,17 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const [tab, setTab] = useState<"bookings" | "blocked" | "hours" | "planning">("bookings");
+  const [tab, setTab] = useState<"bookings" | "blocked" | "hours" | "planning" | "tarifs">("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blocked, setBlocked] = useState<BlockedSlot[]>([]);
   const [availability, setAvailability] = useState<AvailRow[]>([]);
   const [dateAvailability, setDateAvailability] = useState<DateAvailRow[]>([]);
+
+  // Services / Tarifs
+  const [services, setServices] = useState<ServiceRow[]>([]);
+  const [editedServices, setEditedServices] = useState<Record<number, { price: number; duration: number }>>({});
+  const [savingTarifs, setSavingTarifs] = useState(false);
+  const [tarifsSaved, setTarifsSaved] = useState(false);
 
   // Block form
   const [blockDate, setBlockDate] = useState("");
@@ -153,6 +170,15 @@ export default function Admin() {
     if (res.ok) setDateAvailability(await res.json());
   }, [calYear, calMonth]);
 
+  const fetchServices = useCallback(async () => {
+    const res = await fetch("/api/services");
+    if (res.ok) {
+      const data: ServiceRow[] = await res.json();
+      setServices(data);
+      setEditedServices({});
+    }
+  }, []);
+
   const fetchAvailability = useCallback(async () => {
     const res = await fetch("/api/availability");
     if (res.ok) {
@@ -173,8 +199,9 @@ export default function Admin() {
       fetchBlocked();
       fetchAvailability();
       fetchDateAvailability();
+      fetchServices();
     }
-  }, [authenticated, fetchBookings, fetchBlocked, fetchAvailability, fetchDateAvailability]);
+  }, [authenticated, fetchBookings, fetchBlocked, fetchAvailability, fetchDateAvailability, fetchServices]);
 
   /* ─── Login ─── */
   async function handleLogin(e: React.FormEvent) {
@@ -296,6 +323,42 @@ export default function Admin() {
     alert("Horaires enregistrés !");
   }
 
+  async function saveTarifs() {
+    const changes = Object.entries(editedServices).map(([id, vals]) => ({
+      id: Number(id),
+      price: vals.price,
+      duration: vals.duration,
+    }));
+    if (changes.length === 0) return;
+    setSavingTarifs(true);
+    setTarifsSaved(false);
+    await fetch("/api/services", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ services: changes }),
+    });
+    await fetchServices();
+    setSavingTarifs(false);
+    setTarifsSaved(true);
+    setTimeout(() => setTarifsSaved(false), 3000);
+  }
+
+  function getServiceValue(svc: ServiceRow, field: "price" | "duration") {
+    if (editedServices[svc.id]) return editedServices[svc.id][field];
+    return svc[field];
+  }
+
+  function updateServiceField(svc: ServiceRow, field: "price" | "duration", value: number) {
+    setEditedServices((prev) => ({
+      ...prev,
+      [svc.id]: {
+        price: prev[svc.id]?.price ?? svc.price,
+        duration: prev[svc.id]?.duration ?? svc.duration,
+        [field]: value,
+      },
+    }));
+  }
+
   function formatDateFR(dateStr: string) {
     const d = new Date(dateStr + "T00:00:00");
     return `${joursFR[d.getDay()]} ${d.getDate()} ${moisFR[d.getMonth()]} ${d.getFullYear()}`;
@@ -384,6 +447,7 @@ export default function Admin() {
         <button onClick={() => setTab("planning")} style={tabStyle(tab === "planning")}>Planning</button>
         <button onClick={() => setTab("blocked")} style={tabStyle(tab === "blocked")}>Blocages</button>
         <button onClick={() => setTab("hours")} style={tabStyle(tab === "hours")}>Horaires</button>
+        <button onClick={() => setTab("tarifs")} style={tabStyle(tab === "tarifs")}>Tarifs</button>
       </div>
 
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: isMobile ? "0 0.8rem 3rem" : "0 2rem 4rem", overflow: "hidden", boxSizing: "border-box" }}>
@@ -787,6 +851,161 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {/* ═══════ TAB: Tarifs ═══════ */}
+        {tab === "tarifs" && (() => {
+          const categoryOrder = ["Zones individuelles", "Visage & Nuque", "Forfaits Laser", "Cryolipolyse", "Radiofréquence", "Lipocavitation", "Forfaits combinés"];
+          const grouped: Record<string, ServiceRow[]> = {};
+          services.forEach((s) => {
+            if (!grouped[s.category]) grouped[s.category] = [];
+            grouped[s.category].push(s);
+          });
+          const hasChanges = Object.keys(editedServices).length > 0;
+
+          return (
+            <div>
+              <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", marginBottom: "1.5rem", flexDirection: isMobile ? "column" : "row", gap: "1rem" }}>
+                <div>
+                  <h2 style={{ fontSize: "1.3rem", fontWeight: 300, letterSpacing: "0.1em", marginBottom: "0.3rem" }}>
+                    Tarifs &amp; Durées
+                  </h2>
+                  <p style={{ color: "#888", fontSize: "0.9rem", margin: 0 }}>
+                    Modifiez les prix et durées des prestations. Les changements seront visibles sur le site et la page de réservation.
+                  </p>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", flexShrink: 0 }}>
+                  {tarifsSaved && (
+                    <span style={{ fontSize: "0.8rem", color: "#2e7d32" }}>Enregistré !</span>
+                  )}
+                  <button
+                    onClick={saveTarifs}
+                    disabled={!hasChanges || savingTarifs}
+                    style={{
+                      padding: "0.7rem 2rem",
+                      background: hasChanges ? "#000" : "#ccc",
+                      color: "#fff",
+                      border: "none",
+                      fontSize: "0.7rem",
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      cursor: hasChanges && !savingTarifs ? "pointer" : "default",
+                      fontFamily: "inherit",
+                      opacity: savingTarifs ? 0.6 : 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {savingTarifs ? "Enregistrement..." : "Enregistrer"}
+                  </button>
+                </div>
+              </div>
+
+              {categoryOrder.map((cat) => {
+                const items = grouped[cat];
+                if (!items || items.length === 0) return null;
+                return (
+                  <div key={cat} style={{ marginBottom: "2rem" }}>
+                    <h3 style={{ fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#999", marginBottom: "0.8rem", paddingBottom: "0.5rem", borderBottom: "1px solid #eee" }}>
+                      {cat}
+                    </h3>
+                    <div style={{ background: "#fff", border: "1px solid #eee" }}>
+                      {/* Header row - desktop only */}
+                      {!isMobile && (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 120px", gap: "1rem", padding: "0.6rem 1.2rem", borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+                          <span style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa" }}>Prestation</span>
+                          <span style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", textAlign: "center" }}>Prix (€)</span>
+                          <span style={{ fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#aaa", textAlign: "center" }}>Durée (min)</span>
+                        </div>
+                      )}
+                      {items.map((svc, idx) => {
+                        const price = getServiceValue(svc, "price");
+                        const duration = getServiceValue(svc, "duration");
+                        const isEdited = !!editedServices[svc.id];
+                        return (
+                          <div
+                            key={svc.id}
+                            style={{
+                              display: isMobile ? "flex" : "grid",
+                              gridTemplateColumns: isMobile ? undefined : "1fr 120px 120px",
+                              flexDirection: isMobile ? "column" : undefined,
+                              gap: isMobile ? "0.5rem" : "1rem",
+                              padding: isMobile ? "1rem" : "0.8rem 1.2rem",
+                              borderBottom: idx < items.length - 1 ? "1px solid #f0f0f0" : "none",
+                              alignItems: isMobile ? "stretch" : "center",
+                              background: isEdited ? "#fffde7" : "transparent",
+                              transition: "background 0.2s ease",
+                            }}
+                          >
+                            <div>
+                              <span style={{ fontSize: "0.9rem", fontWeight: 400 }}>{svc.name}</span>
+                              {svc.detail && (
+                                <span style={{ fontSize: "0.75rem", color: "#aaa", display: "block", marginTop: "0.15rem" }}>{svc.detail}</span>
+                              )}
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "1rem" : "0", justifyContent: isMobile ? "flex-start" : "center" }}>
+                              {isMobile && <span style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#aaa", width: "70px" }}>Prix (€)</span>}
+                              <input
+                                type="number"
+                                min={0}
+                                value={price}
+                                onChange={(e) => updateServiceField(svc, "price", Number(e.target.value))}
+                                style={{
+                                  width: isMobile ? "80px" : "80px",
+                                  padding: "0.4rem 0.5rem",
+                                  border: "1px solid #ddd",
+                                  fontSize: "0.9rem",
+                                  fontFamily: "inherit",
+                                  textAlign: "center",
+                                  outline: "none",
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "1rem" : "0", justifyContent: isMobile ? "flex-start" : "center" }}>
+                              {isMobile && <span style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "#aaa", width: "70px" }}>Durée (min)</span>}
+                              <input
+                                type="number"
+                                min={5}
+                                step={5}
+                                value={duration}
+                                onChange={(e) => updateServiceField(svc, "duration", Number(e.target.value))}
+                                style={{
+                                  width: isMobile ? "80px" : "80px",
+                                  padding: "0.4rem 0.5rem",
+                                  border: "1px solid #ddd",
+                                  fontSize: "0.9rem",
+                                  fontFamily: "inherit",
+                                  textAlign: "center",
+                                  outline: "none",
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {hasChanges && (
+                <div style={{ position: "sticky", bottom: 0, padding: "1rem", background: "#fff", borderTop: "1px solid #eee", display: "flex", justifyContent: "flex-end", gap: "1rem", boxShadow: "0 -4px 20px rgba(0,0,0,0.05)" }}>
+                  <button
+                    onClick={() => setEditedServices({})}
+                    style={{ padding: "0.7rem 1.5rem", background: "#fff", color: "#666", border: "1px solid #ddd", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={saveTarifs}
+                    disabled={savingTarifs}
+                    style={{ padding: "0.7rem 2rem", background: "#000", color: "#fff", border: "none", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", cursor: savingTarifs ? "wait" : "pointer", fontFamily: "inherit", opacity: savingTarifs ? 0.6 : 1 }}
+                  >
+                    {savingTarifs ? "Enregistrement..." : "Enregistrer les modifications"}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

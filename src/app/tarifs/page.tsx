@@ -2,60 +2,30 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import AnimateOnScroll from "@/components/AnimateOnScroll";
 import AnimatedText from "@/components/AnimatedText";
+import { getDb } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "Tarifs | LH Medical Aesthetics",
   description: "Tarifs épilation laser, cryolipolyse, radiofréquence et lipocavitation à Liège.",
 };
 
-const tarifsLaser = [
-  { zone: "Aisselles", prix: "40 €" },
-  { zone: "Pieds", prix: "20 €" },
-  { zone: "Mains (Doigts)", prix: "20 €" },
-  { zone: "Sillon inter-fessier", prix: "35 €" },
-  { zone: "Maillot simple échancré", prix: "35 €" },
-  { zone: "Maillot intégral", prix: "50 €" },
-  { zone: "Cuisses", prix: "45 €" },
-  { zone: "Demi-jambes / Genoux", prix: "50 €" },
-  { zone: "Jambes complètes", prix: "70 €" },
-  { zone: "Demi-bras", prix: "35 €" },
-  { zone: "Bras complet (sans aisselles)", prix: "50 €" },
-  { zone: "Dos", prix: "90 €" },
-  { zone: "Ligne abdominale", prix: "20 €" },
-  { zone: "Nuque", prix: "35 €" },
-  { zone: "Lèvre supérieur", prix: "25 €" },
-  { zone: "Barbe", prix: "50 €" },
-  { zone: "Duvet", prix: "30 €" },
-];
+export const dynamic = "force-dynamic";
 
-const tarifsCryo = [
-  { zone: "1 zone", prix: "150 €" },
-  { zone: "2 zones", prix: "250 €" },
-  { zone: "3 zones", prix: "350 €" },
-];
+interface ServiceRow {
+  category: string;
+  name: string;
+  price: number;
+  duration: number;
+  detail: string;
+  featured: number;
+  display_order: number;
+}
 
-const tarifsRF = [
-  { zone: "Visage", prix: "80 €" },
-  { zone: "Corps — 1 zone", prix: "90 €" },
-  { zone: "Corps — 2 zones", prix: "150 €" },
-];
-
-const tarifsLipo = [
-  { zone: "1 zone", prix: "80 €" },
-  { zone: "2 zones", prix: "140 €" },
-];
-
-const forfaitsLaser = [
-  { nom: "Forfait 1", detail: "Bikini, Sif, Aisselles", prix: "90 €" },
-  { nom: "Forfait 2", detail: "Bikini, Sif, Aisselles, Demi-jambes", prix: "130 €" },
-  { nom: "Forfait 3", detail: "Bikini, Sif, Ligne abdominale, Aisselles, Jambes complètes", prix: "150 €" },
-  { nom: "Forfait 4", detail: "Tout le corps", prix: "180 €", featured: true },
-];
-
-const forfaitsCombines = [
-  { nom: "Cryo + RF", detail: "Cryolipolyse + Radiofréquence (1 zone)", prix: "200 €" },
-  { nom: "Cryo + RF + Lipo", detail: "Cryolipolyse + Radiofréquence + Lipocavitation (1 zone)", prix: "250 €", featured: true },
-];
+async function getServices() {
+  const db = await getDb();
+  const result = await db.execute("SELECT * FROM services ORDER BY category, display_order");
+  return result.rows as unknown as ServiceRow[];
+}
 
 function TarifGrid({ items }: { items: Array<{ zone: string; prix: string }> }) {
   return (
@@ -72,7 +42,43 @@ function TarifGrid({ items }: { items: Array<{ zone: string; prix: string }> }) 
   );
 }
 
-export default function Tarifs() {
+export default async function Tarifs() {
+  const allServices = await getServices();
+
+  // Group services by category
+  const byCategory: Record<string, ServiceRow[]> = {};
+  allServices.forEach((s) => {
+    if (!byCategory[s.category]) byCategory[s.category] = [];
+    byCategory[s.category].push(s);
+  });
+
+  // Laser = Zones individuelles + Visage & Nuque
+  const tarifsLaser = [...(byCategory["Zones individuelles"] || []), ...(byCategory["Visage & Nuque"] || [])]
+    .map((s) => ({ zone: s.name, prix: `${s.price} €` }));
+
+  const tarifsCryo = (byCategory["Cryolipolyse"] || [])
+    .map((s) => ({ zone: s.name.replace("Cryolipolyse — ", ""), prix: `${s.price} €` }));
+
+  const tarifsRF = (byCategory["Radiofréquence"] || [])
+    .map((s) => ({ zone: s.name.replace("Radiofréquence — ", ""), prix: `${s.price} €` }));
+
+  const tarifsLipo = (byCategory["Lipocavitation"] || [])
+    .map((s) => ({ zone: s.name.replace("Lipocavitation — ", ""), prix: `${s.price} €` }));
+
+  const forfaitsLaser = (byCategory["Forfaits Laser"] || []).map((s, i) => ({
+    nom: `Forfait ${i + 1}`,
+    detail: s.detail || s.name,
+    prix: `${s.price} €`,
+    featured: !!s.featured,
+  }));
+
+  const forfaitsCombines = (byCategory["Forfaits combinés"] || []).map((s) => ({
+    nom: s.name.replace("Forfait ", ""),
+    detail: s.detail || s.name,
+    prix: `${s.price} €`,
+    featured: !!s.featured,
+  }));
+
   return (
     <>
       {/* Hero */}
@@ -167,7 +173,7 @@ export default function Tarifs() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: "1.5rem" }}>
             {forfaitsLaser.map((forfait, i) => {
-              const isFeatured = "featured" in forfait && forfait.featured;
+              const isFeatured = forfait.featured;
               return (
                 <AnimateOnScroll key={forfait.nom} animation="fade-up" delay={i * 0.12}>
                   <div style={{
@@ -268,7 +274,7 @@ export default function Tarifs() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
             {forfaitsCombines.map((forfait, i) => {
-              const isFeatured = "featured" in forfait && forfait.featured;
+              const isFeatured = forfait.featured;
               return (
                 <AnimateOnScroll key={forfait.nom} animation="fade-up" delay={i * 0.15}>
                   <div style={{
