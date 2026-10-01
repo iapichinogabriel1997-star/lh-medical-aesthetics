@@ -122,7 +122,7 @@ export default function Admin() {
 
   // Services / Tarifs
   const [services, setServices] = useState<ServiceRow[]>([]);
-  const [editedServices, setEditedServices] = useState<Record<number, { price: number; duration: number }>>({});
+  const [editedServices, setEditedServices] = useState<Record<number, { price: number; duration: number; name: string }>>({});
   const [savingTarifs, setSavingTarifs] = useState(false);
   const [tarifsSaved, setTarifsSaved] = useState(false);
 
@@ -328,6 +328,7 @@ export default function Admin() {
       id: Number(id),
       price: vals.price,
       duration: vals.duration,
+      name: vals.name,
     }));
     if (changes.length === 0) return;
     setSavingTarifs(true);
@@ -343,17 +344,18 @@ export default function Admin() {
     setTimeout(() => setTarifsSaved(false), 3000);
   }
 
-  function getServiceValue(svc: ServiceRow, field: "price" | "duration") {
+  function getServiceValue(svc: ServiceRow, field: "price" | "duration" | "name") {
     if (editedServices[svc.id]) return editedServices[svc.id][field];
     return svc[field];
   }
 
-  function updateServiceField(svc: ServiceRow, field: "price" | "duration", value: number) {
+  function updateServiceField(svc: ServiceRow, field: "price" | "duration" | "name", value: number | string) {
     setEditedServices((prev) => ({
       ...prev,
       [svc.id]: {
         price: prev[svc.id]?.price ?? svc.price,
         duration: prev[svc.id]?.duration ?? svc.duration,
+        name: prev[svc.id]?.name ?? svc.name,
         [field]: value,
       },
     }));
@@ -936,7 +938,20 @@ export default function Admin() {
                             }}
                           >
                             <div>
-                              <span style={{ fontSize: "0.9rem", fontWeight: 400 }}>{svc.name}</span>
+                              <input
+                                type="text"
+                                value={getServiceValue(svc, "name")}
+                                onChange={(e) => updateServiceField(svc, "name", e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "0.3rem 0.4rem",
+                                  border: "1px solid #eee",
+                                  fontSize: "0.9rem",
+                                  fontFamily: "inherit",
+                                  outline: "none",
+                                  background: "transparent",
+                                }}
+                              />
                               {svc.detail && (
                                 <span style={{ fontSize: "0.75rem", color: "#aaa", display: "block", marginTop: "0.15rem" }}>{svc.detail}</span>
                               )}

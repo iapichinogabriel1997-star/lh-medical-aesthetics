@@ -20,10 +20,17 @@ export async function PUT(req: NextRequest) {
   const db = await getDb();
   for (const svc of services) {
     if (!svc.id || svc.price == null || svc.duration == null) continue;
-    await db.execute({
-      sql: "UPDATE services SET price = ?, duration = ? WHERE id = ?",
-      args: [Number(svc.price), Number(svc.duration), svc.id],
-    });
+    if (svc.name != null) {
+      await db.execute({
+        sql: "UPDATE services SET price = ?, duration = ?, name = ? WHERE id = ?",
+        args: [Number(svc.price), Number(svc.duration), String(svc.name), svc.id],
+      });
+    } else {
+      await db.execute({
+        sql: "UPDATE services SET price = ?, duration = ? WHERE id = ?",
+        args: [Number(svc.price), Number(svc.duration), svc.id],
+      });
+    }
   }
 
   return NextResponse.json({ ok: true });
